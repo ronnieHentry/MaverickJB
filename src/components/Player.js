@@ -1,28 +1,36 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {useNavigation} from '@react-navigation/native';
 
-const Player = ({ route }) => {
-  const { song } = route.params;
+const Player = ({route}) => {
+  const navigation = useNavigation();
+  const {song} = route.params;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => {/* Back button logic */}}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('SongList');
+          }}>
           <Icon name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.nowPlaying}>Now Playing</Text>
-        <TouchableOpacity onPress={() => {/* Settings button logic */}}>
+        <TouchableOpacity
+          onPress={() => {
+            /* Settings button logic */
+          }}>
           <Icon name="settings-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-      <Image source={{ uri: song.image }} style={styles.image} />
+      <Image source={{uri: song.image}} style={styles.image} />
       <Text style={styles.title}>{song.title}</Text>
-      <Text style={styles.artist}>{song.artist} (2020)</Text>
+      <Text style={styles.artist}>{song.artist}</Text>
 
       <View style={styles.sliderContainer}>
-        <Text style={styles.time}>01:27</Text>
+      <Text style={styles.time}>01:27</Text>
         <Slider
           style={styles.slider}
           minimumValue={0}
@@ -42,7 +50,13 @@ const Player = ({ route }) => {
           <Icon name="play-skip-back-outline" size={48} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity>
-          <Icon name="pause-circle-outline" size={64} color="#ff0000" />
+          <Icon name="play-back-outline" size={48} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Icon name="pause-circle-outline" size={84} color="#ff0000" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Icon name="play-forward-outline" size={48} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity>
           <Icon name="play-skip-forward-outline" size={48} color="#fff" />
@@ -60,7 +74,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#121212',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     padding: 20,
   },
   header: {
@@ -69,6 +83,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginBottom: 20,
+    marginTop: 20,
   },
   nowPlaying: {
     color: '#fff',
@@ -85,13 +100,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 10,
   },
   artist: {
     color: '#b3b3b3',
     fontSize: 18,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   sliderContainer: {
     flexDirection: 'row',
@@ -111,9 +125,10 @@ const styles = StyleSheet.create({
   buttons: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    width: '80%',
+    justifyContent: 'space-between',
+    width: '100%',
     marginTop: 20,
+    marginBottom: 20,
   },
 });
 

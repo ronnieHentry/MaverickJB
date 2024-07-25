@@ -37,6 +37,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#121212',
     padding: 10,
+    paddingTop: 30,
+    paddingBottom: 30
   },
   songContainer: {
     flexDirection: 'row',
