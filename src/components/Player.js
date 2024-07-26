@@ -1,12 +1,26 @@
-import React from 'react';
-import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-const Player = ({route}) => {
+const Player = ({ route }) => {
   const navigation = useNavigation();
-  const {song} = route.params;
+  const { song } = route.params;
+
+  const [eqOn, setEqOn] = useState(false);
+  const [speedOn, setSpeedOn] = useState(false);
+  const [pitchOn, setPitchOn] = useState(false);
+  const [abOn, setAbOn] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  const handleToggle = (setter, currentState) => {
+    setter(!currentState);
+  };
+
+  const handlePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
 
   return (
     <View style={styles.container}>
@@ -25,18 +39,41 @@ const Player = ({route}) => {
           <Icon name="settings-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-      <Image source={{uri: song.image}} style={styles.image} />
+      <Image source={{ uri: song.image }} style={styles.image} />
       <Text style={styles.title}>{song.title}</Text>
       <Text style={styles.artist}>{song.artist}</Text>
 
+      <View style={styles.buttonRow}>
+        <TouchableOpacity style={styles.button} onPress={() => handleToggle(setEqOn, eqOn)}>
+          <Text style={styles.buttonText}>{eqOn ? 'ON' : 'OFF'}</Text>
+          <View style={[styles.bar, eqOn && styles.barOn]} />
+          <Text style={styles.buttonLabel}>EQ</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => handleToggle(setSpeedOn, speedOn)}>
+          <Text style={styles.buttonText}>{speedOn ? 'ON' : 'OFF'}</Text>
+          <View style={[styles.bar, speedOn && styles.barOn]} />
+          <Text style={styles.buttonLabel}>Speed</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => handleToggle(setPitchOn, pitchOn)}>
+          <Text style={styles.buttonText}>{pitchOn ? 'ON' : 'OFF'}</Text>
+          <View style={[styles.bar, pitchOn && styles.barOn]} />
+          <Text style={styles.buttonLabel}>Pitch</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => handleToggle(setAbOn, abOn)}>
+          <Text style={styles.buttonText}>{abOn ? 'ON' : 'OFF'}</Text>
+          <View style={[styles.bar, abOn && styles.barOn]} />
+          <Text style={styles.buttonLabel}>A-B</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.sliderContainer}>
-      <Text style={styles.time}>01:27</Text>
+        <Text style={styles.time}>01:27</Text>
         <Slider
           style={styles.slider}
           minimumValue={0}
           maximumValue={1}
           minimumTrackTintColor="#ff0000"
-          maximumTrackTintColor="#333"
+          maximumTrackTintColor="#555"
           thumbTintColor="#ff0000"
         />
         <Text style={styles.time}>04:56</Text>
@@ -52,8 +89,8 @@ const Player = ({route}) => {
         <TouchableOpacity>
           <Icon name="play-back-outline" size={48} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Icon name="pause-circle-outline" size={84} color="#ff0000" />
+        <TouchableOpacity onPress={handlePlayPause}>
+          <Icon name={isPlaying ? "pause-circle-outline" : "play-circle-outline"} size={84} color="#ff0000" />
         </TouchableOpacity>
         <TouchableOpacity>
           <Icon name="play-forward-outline" size={48} color="#fff" />
@@ -72,7 +109,7 @@ const Player = ({route}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: '#1c1c1c',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 20,
@@ -88,11 +125,12 @@ const styles = StyleSheet.create({
   nowPlaying: {
     color: '#fff',
     fontSize: 18,
+    fontWeight: 'bold',
   },
   image: {
     width: 300,
     height: 300,
-    borderRadius: 10,
+    borderRadius: 15,
     marginBottom: 20,
   },
   title: {
@@ -100,12 +138,45 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginVertical: 10,
   },
   artist: {
-    color: '#b3b3b3',
+    color: '#d3d3d3',
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 30,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 20,
+  },
+  button: {
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#333',
+    borderRadius: 10,
+    width: '22%',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 9,
+    marginBottom: 5,
+  },
+  buttonLabel: {
+    color: '#d3d3d3',
+    fontSize: 11,
+    marginTop: 5,
+  },
+  bar: {
+    height: 4,
+    width: '100%',
+    backgroundColor: '#555',
+    marginVertical: 5,
+  },
+  barOn: {
+    backgroundColor: '#ff0000',
   },
   sliderContainer: {
     flexDirection: 'row',
@@ -115,7 +186,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   time: {
-    color: '#b3b3b3',
+    color: '#d3d3d3',
     fontSize: 14,
   },
   slider: {
