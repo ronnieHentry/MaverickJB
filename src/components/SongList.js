@@ -1,30 +1,93 @@
-import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { SONGS } from './utils/constants';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import RNFS from 'react-native-fs';
+import {
+  getAll,
+  SortSongFields,
+  SortSongOrder,
+} from 'react-native-get-music-files';
+
+const defaultImage = require('../../assets/Icon-removebg-preview.png');
 
 const SongList = () => {
+  const [songs, setSongs] = useState([]);
   const navigation = useNavigation();
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('Player', { song: item })}>
-      <View style={styles.songContainer}>
-        <Image source={{ uri: item.image }} style={styles.image} />
-        <View style={styles.songDetails}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.artist}>{item.artist}</Text>
+  useEffect(() => {
+    const loadSongs = async () => {
+      try {
+        const commonMusicDirs = [RNFS.ExternalStorageDirectoryPath + '/Music'];
+        const mp3Files = [];
+
+        for (const dir of commonMusicDirs) {
+          const files = await RNFS.readDir(dir);
+          files.forEach(file => {
+            if (file.isFile() && file.name.endsWith('.mp3')) {
+              mp3Files.push(file.path);
+            }
+          });
+        }
+
+        // Fetch metadata for all found mp3 files
+        const musicFiles = await getAll({
+          limit: 200,
+          offset: 0,
+          coverQuality: 50,
+          minSongDuration: 1000,
+          sortBy: SortSongFields.TITLE,
+          sortOrder: SortSongOrder.DESC,
+        });
+
+        const formattedSongs = musicFiles.map(file => ({
+          id: file.path,
+          title: file.title,
+          artist: file.author,
+          image: file.cover || defaultImage,
+          path: file.path,
+        }));
+
+        setSongs(formattedSongs);
+      } catch (error) {
+        console.error('Error loading songs:', error);
+      }
+    };
+
+    loadSongs();
+  }, []);
+
+  const renderItem = ({item}) => {
+    const imageSource =
+      typeof item.image === 'string' ? {uri: item.image} : item.image;
+
+    return (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Player', {song: item})}>
+        <View style={styles.songContainer}>
+          <Image source={imageSource} style={styles.image} />
+          <View style={styles.songDetails}>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.artist}>{item.artist}</Text>
+          </View>
+          <TouchableOpacity style={styles.playButton}>
+            <Text style={styles.playText}>▶</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.playButton}>
-          <Text style={styles.playText}>▶</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={SONGS}
+        data={songs}
         renderItem={renderItem}
         keyExtractor={item => item.id}
       />
@@ -38,7 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
     padding: 10,
     paddingTop: 30,
-    paddingBottom: 30
+    paddingBottom: 30,
   },
   songContainer: {
     flexDirection: 'row',

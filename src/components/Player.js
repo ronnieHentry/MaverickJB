@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
-const Player = ({ route }) => {
+const getImageSource = image => {
+  if (typeof image === 'string') {
+    return {uri: image};
+  }
+  return image;
+};
+
+const Player = ({route}) => {
   const navigation = useNavigation();
-  const { song } = route.params;
+  const {song} = route.params;
 
   const [eqOn, setEqOn] = useState(false);
   const [speedOn, setSpeedOn] = useState(false);
@@ -39,27 +46,35 @@ const Player = ({ route }) => {
           <Icon name="settings-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-      <Image source={{ uri: song.image }} style={styles.image} />
+      <Image source={getImageSource(song.image)} style={styles.image} />
       <Text style={styles.title}>{song.title}</Text>
       <Text style={styles.artist}>{song.artist}</Text>
 
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.button} onPress={() => handleToggle(setEqOn, eqOn)}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => handleToggle(setEqOn, eqOn)}>
           <Text style={styles.buttonText}>{eqOn ? 'ON' : 'OFF'}</Text>
           <View style={[styles.bar, eqOn && styles.barOn]} />
           <Text style={styles.buttonLabel}>EQ</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => handleToggle(setSpeedOn, speedOn)}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => handleToggle(setSpeedOn, speedOn)}>
           <Text style={styles.buttonText}>{speedOn ? 'ON' : 'OFF'}</Text>
           <View style={[styles.bar, speedOn && styles.barOn]} />
           <Text style={styles.buttonLabel}>Speed</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => handleToggle(setPitchOn, pitchOn)}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => handleToggle(setPitchOn, pitchOn)}>
           <Text style={styles.buttonText}>{pitchOn ? 'ON' : 'OFF'}</Text>
           <View style={[styles.bar, pitchOn && styles.barOn]} />
           <Text style={styles.buttonLabel}>Pitch</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => handleToggle(setAbOn, abOn)}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => handleToggle(setAbOn, abOn)}>
           <Text style={styles.buttonText}>{abOn ? 'ON' : 'OFF'}</Text>
           <View style={[styles.bar, abOn && styles.barOn]} />
           <Text style={styles.buttonLabel}>A-B</Text>
@@ -90,7 +105,11 @@ const Player = ({ route }) => {
           <Icon name="play-back-outline" size={48} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity onPress={handlePlayPause}>
-          <Icon name={isPlaying ? "pause-circle-outline" : "play-circle-outline"} size={84} color="#ff0000" />
+          <Icon
+            name={isPlaying ? 'pause-circle-outline' : 'play-circle-outline'}
+            size={84}
+            color="#ff0000"
+          />
         </TouchableOpacity>
         <TouchableOpacity>
           <Icon name="play-forward-outline" size={48} color="#fff" />
