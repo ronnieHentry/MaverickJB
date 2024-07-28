@@ -1,15 +1,11 @@
+// Player.js
 import React, {useState} from 'react';
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-
-const getImageSource = image => {
-  if (typeof image === 'string') {
-    return {uri: image};
-  }
-  return image;
-};
+import {getImageSource, handleToggle, handlePlayPause} from './utils/helper';
+import { ControlButton } from './ControlButton';
 
 const Player = ({route}) => {
   const navigation = useNavigation();
@@ -21,28 +17,14 @@ const Player = ({route}) => {
   const [abOn, setAbOn] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
 
-  const handleToggle = (setter, currentState) => {
-    setter(!currentState);
-  };
-
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('SongList');
-          }}>
+        <TouchableOpacity onPress={() => navigation.navigate('SongList')}>
           <Icon name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.nowPlaying}>Now Playing</Text>
-        <TouchableOpacity
-          onPress={() => {
-            /* Settings button logic */
-          }}>
+        <TouchableOpacity>
           <Icon name="settings-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -51,34 +33,26 @@ const Player = ({route}) => {
       <Text style={styles.artist}>{song.artist}</Text>
 
       <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handleToggle(setEqOn, eqOn)}>
-          <Text style={styles.buttonText}>{eqOn ? 'ON' : 'OFF'}</Text>
-          <View style={[styles.bar, eqOn && styles.barOn]} />
-          <Text style={styles.buttonLabel}>EQ</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handleToggle(setSpeedOn, speedOn)}>
-          <Text style={styles.buttonText}>{speedOn ? 'ON' : 'OFF'}</Text>
-          <View style={[styles.bar, speedOn && styles.barOn]} />
-          <Text style={styles.buttonLabel}>Speed</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handleToggle(setPitchOn, pitchOn)}>
-          <Text style={styles.buttonText}>{pitchOn ? 'ON' : 'OFF'}</Text>
-          <View style={[styles.bar, pitchOn && styles.barOn]} />
-          <Text style={styles.buttonLabel}>Pitch</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handleToggle(setAbOn, abOn)}>
-          <Text style={styles.buttonText}>{abOn ? 'ON' : 'OFF'}</Text>
-          <View style={[styles.bar, abOn && styles.barOn]} />
-          <Text style={styles.buttonLabel}>A-B</Text>
-        </TouchableOpacity>
+        <ControlButton
+          label="EQ"
+          isActive={eqOn}
+          onPress={() => handleToggle(setEqOn, eqOn)}
+        />
+        <ControlButton
+          label="Speed"
+          isActive={speedOn}
+          onPress={() => handleToggle(setSpeedOn, speedOn)}
+        />
+        <ControlButton
+          label="Pitch"
+          isActive={pitchOn}
+          onPress={() => handleToggle(setPitchOn, pitchOn)}
+        />
+        <ControlButton
+          label="A-B"
+          isActive={abOn}
+          onPress={() => handleToggle(setAbOn, abOn)}
+        />
       </View>
 
       <View style={styles.sliderContainer}>
@@ -104,7 +78,8 @@ const Player = ({route}) => {
         <TouchableOpacity>
           <Icon name="play-back-outline" size={48} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handlePlayPause}>
+        <TouchableOpacity
+          onPress={() => handlePlayPause(isPlaying, setIsPlaying)}>
           <Icon
             name={isPlaying ? 'pause-circle-outline' : 'play-circle-outline'}
             size={84}
