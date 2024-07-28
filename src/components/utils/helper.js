@@ -33,11 +33,11 @@ export const fetchMusicFilesMetadata = async () => {
   });
 
   return musicFiles.map(file => ({
-    id: file.path,
+    id: file.url,
     title: file.title,
     artist: file.author,
     image: file.cover || defaultImage,
-    path: file.path,
+    path: file.url,
   }));
 };
 

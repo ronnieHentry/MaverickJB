@@ -21,7 +21,6 @@ const SongList = () => {
   }, []);
 
   const getItem = (data, index) => data[index];
-
   const getItemCount = data => data.length;
 
   return (
@@ -29,11 +28,10 @@ const SongList = () => {
       <VirtualizedList
         data={songs}
         initialNumToRender={10}
-        renderItem={({item}) => <SongItem item={item} key={item.id} />}
+        renderItem={({item}) => <SongItem item={item} />}
         keyExtractor={item => item.id}
         getItem={getItem}
         getItemCount={getItemCount}
-        key={item => item.id}
       />
     </View>
   );
