@@ -2,14 +2,17 @@ import React from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
-const SongItem = React.memo(({item}) => {
+const SongItem = React.memo(({item, onPress}) => {
   const navigation = useNavigation();
   const imageSource =
     typeof item.image === 'string' ? {uri: item.image} : item.image;
 
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate('Player', {song: item})}>
+      onPress={() => {
+        onPress();
+        navigation.navigate('Player', {song: item});
+      }}>
       <View style={styles.songContainer}>
         <Image source={imageSource} style={styles.image} />
         <View style={styles.songDetails}>
@@ -43,15 +46,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: '#f5f5f5',
+    color: '#e0e0e0',
     fontSize: 16,
     fontWeight: '600',
-    fontFamily: 'HelveticaNeue',
   },
   artist: {
     color: '#b3b3b3',
     fontSize: 14,
-    fontFamily: 'HelveticaNeue-Light',
   },
   playButton: {
     padding: 10,

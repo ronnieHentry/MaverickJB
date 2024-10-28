@@ -13,6 +13,7 @@
     "@react-native-community/slider": "^4.5.2",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
+    "@reduxjs/toolkit": "^2.2.7",
     "music-metadata": "^10.0.0",
     "react": "18.2.0",
     "react-native": "0.74.3",
@@ -24,6 +25,7 @@
     "react-native-screens": "^3.32.0",
     "react-native-sound": "^0.11.2",
     "react-native-vector-icons": "^10.1.0",
+    "react-redux": "^9.1.2",
     "rn-fetch-blob": "^0.12.0"
   },
   "devDependencies": {

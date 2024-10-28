@@ -1,21 +1,45 @@
-// Player.js
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-import {getImageSource, handleToggle, handlePlayPause} from './utils/helper';
-import { ControlButton } from './ControlButton';
+import {useDispatch, useSelector} from 'react-redux';
+import {getImageSource, handleToggle} from './utils/helper';
+import {ControlButton} from './ControlButton';
+// import {
+//   playSong,
+//   pauseSong,
+//   resumeSong,
+//   setPlaybackPosition,
+// } from '../store/actions/audioActions';
 
 const Player = ({route}) => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const {song} = route.params;
+
+  // const isPlaying = useSelector(state => state.audio.isPlaying);
+  // const playbackPosition = useSelector(state => state.audio.playbackPosition);
 
   const [eqOn, setEqOn] = useState(false);
   const [speedOn, setSpeedOn] = useState(false);
   const [pitchOn, setPitchOn] = useState(false);
   const [abOn, setAbOn] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
+
+  // useEffect(() => {
+  //   dispatch(playSong(song));
+  //   return () => {
+  //     dispatch(pauseSong());
+  //   };
+  // }, [dispatch, song]);
+
+  // const handlePlayPause = () => {
+  //   if (isPlaying) {
+  //     dispatch(pauseSong());
+  //   } else {
+  //     dispatch(resumeSong());
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
@@ -56,7 +80,9 @@ const Player = ({route}) => {
       </View>
 
       <View style={styles.sliderContainer}>
-        <Text style={styles.time}>01:27</Text>
+        <Text style={styles.time}>
+          {new Date(playbackPosition * 1000).toISOString().substr(14, 5)}
+        </Text>
         <Slider
           style={styles.slider}
           minimumValue={0}
@@ -64,6 +90,8 @@ const Player = ({route}) => {
           minimumTrackTintColor="#ff0000"
           maximumTrackTintColor="#555"
           thumbTintColor="#ff0000"
+          // value={playbackPosition}
+          // onSlidingComplete={value => dispatch(setPlaybackPosition(value))}
         />
         <Text style={styles.time}>04:56</Text>
       </View>
@@ -78,8 +106,7 @@ const Player = ({route}) => {
         <TouchableOpacity>
           <Icon name="play-back-outline" size={48} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handlePlayPause(isPlaying, setIsPlaying)}>
+        <TouchableOpacity onPress={handlePlayPause}>
           <Icon
             name={isPlaying ? 'pause-circle-outline' : 'play-circle-outline'}
             size={84}

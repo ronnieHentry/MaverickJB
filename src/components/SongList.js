@@ -1,17 +1,22 @@
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, VirtualizedList} from 'react-native';
 import {fetchMp3Files, fetchMusicFilesMetadata} from './utils/helper';
+import {setSongsList} from '../store/slices/songsSlice';
 import SongItem from './SongItem';
+import {useSelector, useDispatch} from 'react-redux';
 
 const SongList = () => {
-  const [songs, setSongs] = useState([]);
+  const dispatch = useDispatch();
+  const {songs} = useSelector(state => state.songsSlice);
+  // const [songs, setSongs] = useState([]);
 
   useEffect(() => {
     const loadSongs = async () => {
       try {
         const mp3Files = await fetchMp3Files();
         const formattedSongs = await fetchMusicFilesMetadata();
-        setSongs(formattedSongs);
+        // setSongs(formattedSongs);
+        dispatch(setSongsList({songs: formattedSongs}));
       } catch (error) {
         console.error('Error loading songs:', error);
       }
