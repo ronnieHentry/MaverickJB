@@ -6,40 +6,18 @@ import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {getImageSource, handleToggle} from './utils/helper';
 import {ControlButton} from './ControlButton';
-// import {
-//   playSong,
-//   pauseSong,
-//   resumeSong,
-//   setPlaybackPosition,
-// } from '../store/actions/audioActions';
 
 const Player = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const {song} = route.params;
 
-  // const isPlaying = useSelector(state => state.audio.isPlaying);
-  // const playbackPosition = useSelector(state => state.audio.playbackPosition);
-
   const [eqOn, setEqOn] = useState(false);
   const [speedOn, setSpeedOn] = useState(false);
   const [pitchOn, setPitchOn] = useState(false);
+
+  // This feature should be cleared on selection of new song
   const [abOn, setAbOn] = useState(false);
-
-  // useEffect(() => {
-  //   dispatch(playSong(song));
-  //   return () => {
-  //     dispatch(pauseSong());
-  //   };
-  // }, [dispatch, song]);
-
-  // const handlePlayPause = () => {
-  //   if (isPlaying) {
-  //     dispatch(pauseSong());
-  //   } else {
-  //     dispatch(resumeSong());
-  //   }
-  // };
 
   return (
     <View style={styles.container}>
