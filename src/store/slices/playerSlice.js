@@ -17,10 +17,11 @@ const playerSlice = createSlice({
           console.error('Failed to load sound', error);
           return;
         }
+        sound.setPitch(1.6); 
         sound.play();
-        state.isPlaying = true;
       });
       state.currentSound = sound;
+      state.isPlaying = true;
     },
     stopSound: (state) => {
       if (state.currentSound) {

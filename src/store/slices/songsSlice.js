@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
-  songs: null,
+  songs: [],
   isPlaying: false,
 };
 
@@ -10,8 +10,7 @@ const songsSlice = createSlice({
   initialState,
   reducers: {
     setSongsList: (state, action) => {
-      console.log(action);
-      state.songs = action.payload;
+      state.songs = action.payload.songs;
     },
   },
 });

@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {View, StyleSheet, VirtualizedList} from 'react-native';
-import {fetchMp3Files, fetchMusicFilesMetadata} from './utils/helper';
+import {fetchMusicFilesMetadata} from './utils/helper';
 import {setSongsList} from '../store/slices/songsSlice';
-import {playSound, stopSound} from '../store/slices/playerSlice';  // Import actions
+import {playSound, stopSound} from '../store/slices/playerSlice'; // Import actions
 import SongItem from './SongItem';
 import {useSelector, useDispatch} from 'react-redux';
 
@@ -13,7 +13,6 @@ const SongList = () => {
   useEffect(() => {
     const loadSongs = async () => {
       try {
-        // const mp3Files = await fetchMp3Files();
         const formattedSongs = await fetchMusicFilesMetadata();
         dispatch(setSongsList({songs: formattedSongs}));
       } catch (error) {
@@ -24,9 +23,10 @@ const SongList = () => {
     loadSongs();
   }, []);
 
-  const handlePress = (song) => {
-    dispatch(stopSound());  // Stop any currently playing sound
-    dispatch(playSound({path: song.path}));  // Play selected song
+  const handlePress = song => {
+    console.log("DISPATCH");
+    dispatch(stopSound()); // Stop any currently playing sound
+    dispatch(playSound({path: song.path})); // Play selected song
   };
 
   const getItem = (data, index) => data[index];
@@ -37,7 +37,9 @@ const SongList = () => {
       <VirtualizedList
         data={songs}
         initialNumToRender={10}
-        renderItem={({item}) => <SongItem item={item} onPress={() => handlePress(item)} />}
+        renderItem={({item}) => (
+          <SongItem item={item} onPress={() => handlePress(item)} />
+        )}
         keyExtractor={item => item.id}
         getItem={getItem}
         getItemCount={getItemCount}
