@@ -11,7 +11,8 @@ const Player = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const {song} = route.params;
-
+  console.log(song);
+  
   const [eqOn, setEqOn] = useState(false);
   const [speedOn, setSpeedOn] = useState(false);
   const [pitchOn, setPitchOn] = useState(false);
@@ -59,7 +60,7 @@ const Player = ({route}) => {
 
       <View style={styles.sliderContainer}>
         <Text style={styles.time}>
-          {new Date(playbackPosition * 1000).toISOString().substr(14, 5)}
+          {/* {new Date(playbackPosition * 1000).toISOString().substr(14, 5)} */}
         </Text>
         <Slider
           style={styles.slider}
@@ -84,13 +85,13 @@ const Player = ({route}) => {
         <TouchableOpacity>
           <Icon name="play-back-outline" size={48} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handlePlayPause}>
+        {/* <TouchableOpacity onPress={handlePlayPause}>
           <Icon
             name={isPlaying ? 'pause-circle-outline' : 'play-circle-outline'}
             size={84}
             color="#ff0000"
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity>
           <Icon name="play-forward-outline" size={48} color="#fff" />
         </TouchableOpacity>

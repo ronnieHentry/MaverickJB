@@ -23,11 +23,10 @@ const SongList = () => {
     loadSongs();
   }, []);
 
-  const handlePress = song => {
-    console.log("DISPATCH");
-    dispatch(stopSound()); // Stop any currently playing sound
-    dispatch(playSound({path: song.path})); // Play selected song
-  };
+  const handlePress = (song) => {
+    dispatch(stopSound()); // Stop any currently playing sound using the thunk
+    dispatch(playSound(song.path)); // Play the selected song using the thunk
+  };  
 
   const getItem = (data, index) => data[index];
   const getItemCount = data => data.length;

@@ -11,7 +11,7 @@ const SongItem = React.memo(({item, onPress}) => {
     <TouchableOpacity
       onPress={() => {
         onPress();
-        // navigation.navigate('Player', {song: item});
+        navigation.navigate('Player', {song: item});
       }}>
       <View style={styles.songContainer}>
         <Image source={imageSource} style={styles.image} />
