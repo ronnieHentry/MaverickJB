@@ -4,40 +4,101 @@ import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
-import {getImageSource, handleToggle} from '../utils/helper';
-import { toggleEq, toggleSpeed, togglePitch, toggleAb, resetAb } from '../../store/slices/controlsSlice'
+import {formatTime, getImageSource, handleToggle} from '../utils/helper';
+import {
+  toggleEq,
+  toggleSpeed,
+  togglePitch,
+  toggleAb,
+  resetAb,
+  toggleShuffle,
+  toggleRepeat,
+} from '../../store/slices/controlsSlice';
 import ToggleButtons from '../ReusableComponents/ToggleButtons';
-import {playBack, playForward} from '../../store/slices/playerSlice';
+import {
+  playBack,
+  playForward,
+  seekToPosition,
+  togglePlayPause,
+  updatePlaybackPosition,
+} from '../../store/slices/playerSlice';
+import PlayerControls from '../ReusableComponents/PlayerControls';
 
 const Player = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const {song} = route.params;
-  const { eqOn, speedOn, pitchOn, abOn } = useSelector((state) => state.controlsSlice);
-  const { isPlaying } = useSelector((state) => state.playerSlice);
+  const {eqOn, speedOn, pitchOn, abOn, shuffleOn, repeatOn} = useSelector(
+    state => state.controlsSlice,
+  );
+  const {isPlaying, playbackPosition, duration} = useSelector(
+    state => state.playerSlice,
+  );
 
   const toggleButtons = [
-    { label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq()) },
-    { label: 'Speed', isActive: speedOn, onPress: () => dispatch(toggleSpeed()) },
-    { label: 'Pitch', isActive: pitchOn, onPress: () => dispatch(togglePitch()) },
-    { label: 'A-B', isActive: abOn, onPress: () => dispatch(toggleAb()) },
+    {label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq())},
+    {label: 'Speed', isActive: speedOn, onPress: () => dispatch(toggleSpeed())},
+    {label: 'Pitch', isActive: pitchOn, onPress: () => dispatch(togglePitch())},
+    {label: 'A-B', isActive: abOn, onPress: () => dispatch(toggleAb())},
   ];
 
   const buttons = [
-    { name: 'shuffle-outline', size: 24, onPress: () => console.log('Shuffle') },
-    { name: 'play-skip-back-outline', size: 48, onPress: () => console.log('Skip Back') },
-    { name: 'play-back-outline', size: 48, onPress: () => dispatch(playBack()) },
+    {
+      name: 'shuffle-outline',
+      size: 24,
+      onPress: () => dispatch(toggleShuffle()),
+      iconColor: shuffleOn ? '#ff0000' : '#fff',
+    },
+    {
+      name: 'play-skip-back-outline',
+      size: 48,
+      onPress: () => console.log('Skip Back'),
+      iconColor: '#fff',
+    },
+    {
+      name: 'play-back-outline',
+      size: 48,
+      onPress: () => dispatch(playBack()),
+      iconColor: '#fff',
+    },
     {
       name: isPlaying ? 'pause-circle-outline' : 'play-circle-outline',
       size: 84,
       onPress: () => {
-        console.log('Play/Pause');
-      }
+        dispatch(togglePlayPause());
+      },
+      iconColor: '#fff',
     },
-    { name: 'play-forward-outline', size: 48, onPress: () => dispatch(playForward()) },
-    { name: 'play-skip-forward-outline', size: 48, onPress: () => console.log('Skip Forward') },
-    { name: 'repeat-outline', size: 24, onPress: () => console.log('Repeat') },
+    {
+      name: 'play-forward-outline',
+      size: 48,
+      onPress: () => dispatch(playForward()),
+      iconColor: '#fff',
+    },
+    {
+      name: 'play-skip-forward-outline',
+      size: 48,
+      onPress: () => console.log('Skip Forward'),
+      iconColor: '#fff',
+    },
+    {
+      name: 'repeat-outline',
+      size: 24,
+      onPress: () => dispatch(toggleRepeat()),
+      iconColor: repeatOn ? '#ff0000' : '#fff',
+    },
   ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      dispatch(updatePlaybackPosition());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [dispatch]);
+
+  const currentTime = formatTime(playbackPosition * duration);
+  const totalTime = formatTime(duration);
 
   return (
     <View style={styles.container}>
@@ -54,12 +115,10 @@ const Player = ({route}) => {
       <Text style={styles.title}>{song.title}</Text>
       <Text style={styles.artist}>{song.artist}</Text>
 
-      <ToggleButtons buttons={toggleButtons}/>
+      <ToggleButtons buttons={toggleButtons} />
 
       <View style={styles.sliderContainer}>
-        <Text style={styles.time}>
-          {/* {new Date(playbackPosition * 1000).toISOString().substr(14, 5)} */}
-        </Text>
+        <Text style={styles.time}>{currentTime}</Text>
         <Slider
           style={styles.slider}
           minimumValue={0}
@@ -67,14 +126,13 @@ const Player = ({route}) => {
           minimumTrackTintColor="#ff0000"
           maximumTrackTintColor="#555"
           thumbTintColor="#ff0000"
-          // value={playbackPosition}
-          // onSlidingComplete={value => dispatch(setPlaybackPosition(value))}
+          value={playbackPosition}
+          onSlidingComplete={value => dispatch(seekToPosition(value))}
         />
-        <Text style={styles.time}>04:56</Text>
+        <Text style={styles.time}>{totalTime}</Text>
       </View>
-
       <View style={styles.buttons}>
-      <PlayerControls buttons={buttons} />
+        <PlayerControls buttons={buttons} />
       </View>
     </View>
   );
@@ -166,7 +224,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    marginTop: 20,
     marginBottom: 20,
   },
 });
