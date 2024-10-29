@@ -4,21 +4,40 @@ import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
-import {getImageSource, handleToggle} from './utils/helper';
-import {ControlButton} from './ControlButton';
+import {getImageSource, handleToggle} from '../utils/helper';
+import { toggleEq, toggleSpeed, togglePitch, toggleAb, resetAb } from '../../store/slices/controlsSlice'
+import ToggleButtons from '../ReusableComponents/ToggleButtons';
+import {playBack, playForward} from '../../store/slices/playerSlice';
 
 const Player = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const {song} = route.params;
-  console.log(song);
-  
-  const [eqOn, setEqOn] = useState(false);
-  const [speedOn, setSpeedOn] = useState(false);
-  const [pitchOn, setPitchOn] = useState(false);
+  const { eqOn, speedOn, pitchOn, abOn } = useSelector((state) => state.controlsSlice);
+  const { isPlaying } = useSelector((state) => state.playerSlice);
 
-  // This feature should be cleared on selection of new song
-  const [abOn, setAbOn] = useState(false);
+  const toggleButtons = [
+    { label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq()) },
+    { label: 'Speed', isActive: speedOn, onPress: () => dispatch(toggleSpeed()) },
+    { label: 'Pitch', isActive: pitchOn, onPress: () => dispatch(togglePitch()) },
+    { label: 'A-B', isActive: abOn, onPress: () => dispatch(toggleAb()) },
+  ];
+
+  const buttons = [
+    { name: 'shuffle-outline', size: 24, onPress: () => console.log('Shuffle') },
+    { name: 'play-skip-back-outline', size: 48, onPress: () => console.log('Skip Back') },
+    { name: 'play-back-outline', size: 48, onPress: () => dispatch(playBack()) },
+    {
+      name: isPlaying ? 'pause-circle-outline' : 'play-circle-outline',
+      size: 84,
+      onPress: () => {
+        console.log('Play/Pause');
+      }
+    },
+    { name: 'play-forward-outline', size: 48, onPress: () => dispatch(playForward()) },
+    { name: 'play-skip-forward-outline', size: 48, onPress: () => console.log('Skip Forward') },
+    { name: 'repeat-outline', size: 24, onPress: () => console.log('Repeat') },
+  ];
 
   return (
     <View style={styles.container}>
@@ -35,28 +54,7 @@ const Player = ({route}) => {
       <Text style={styles.title}>{song.title}</Text>
       <Text style={styles.artist}>{song.artist}</Text>
 
-      <View style={styles.buttonRow}>
-        <ControlButton
-          label="EQ"
-          isActive={eqOn}
-          onPress={() => handleToggle(setEqOn, eqOn)}
-        />
-        <ControlButton
-          label="Speed"
-          isActive={speedOn}
-          onPress={() => handleToggle(setSpeedOn, speedOn)}
-        />
-        <ControlButton
-          label="Pitch"
-          isActive={pitchOn}
-          onPress={() => handleToggle(setPitchOn, pitchOn)}
-        />
-        <ControlButton
-          label="A-B"
-          isActive={abOn}
-          onPress={() => handleToggle(setAbOn, abOn)}
-        />
-      </View>
+      <ToggleButtons buttons={toggleButtons}/>
 
       <View style={styles.sliderContainer}>
         <Text style={styles.time}>
@@ -76,31 +74,7 @@ const Player = ({route}) => {
       </View>
 
       <View style={styles.buttons}>
-        <TouchableOpacity>
-          <Icon name="shuffle-outline" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Icon name="play-skip-back-outline" size={48} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Icon name="play-back-outline" size={48} color="#fff" />
-        </TouchableOpacity>
-        {/* <TouchableOpacity onPress={handlePlayPause}>
-          <Icon
-            name={isPlaying ? 'pause-circle-outline' : 'play-circle-outline'}
-            size={84}
-            color="#ff0000"
-          />
-        </TouchableOpacity> */}
-        <TouchableOpacity>
-          <Icon name="play-forward-outline" size={48} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Icon name="play-skip-forward-outline" size={48} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Icon name="repeat-outline" size={24} color="#fff" />
-        </TouchableOpacity>
+      <PlayerControls buttons={buttons} />
       </View>
     </View>
   );
@@ -145,12 +119,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 30,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 20,
   },
   button: {
     alignItems: 'center',

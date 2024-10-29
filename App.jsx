@@ -1,11 +1,11 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import SongList from './src/components/SongList';
-import Player from './src/components/Player';
-import PermissionWrapper from './src/components/PermissionWrapper';
 import {Provider} from 'react-redux';
 import {store} from './src/store/store';
+import SongList from './src/components/Pages/SongList';
+import Player from './src/components/Pages/Player';
+import PermissionWrapper from './src/components/ReusableComponents/PermissionWrapper'
 
 const Stack = createStackNavigator();
 

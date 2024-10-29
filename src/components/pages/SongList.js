@@ -1,9 +1,10 @@
 import React, {useEffect} from 'react';
 import {View, StyleSheet, VirtualizedList} from 'react-native';
-import {fetchMusicFilesMetadata} from './utils/helper';
-import {setSongsList} from '../store/slices/songsSlice';
-import {playSound, stopSound} from '../store/slices/playerSlice'; // Import actions
-import SongItem from './SongItem';
+import {fetchMusicFilesMetadata} from '../utils/helper';
+import {setSongsList} from '../../store/slices/songsSlice';
+import {playSound, stopSound} from '../../store/slices/playerSlice'; // Import actions
+import { resetAb } from '../../store/slices/controlsSlice';
+import SongItem from '../ReusableComponents';
 import {useSelector, useDispatch} from 'react-redux';
 
 const SongList = () => {
@@ -24,8 +25,10 @@ const SongList = () => {
   }, []);
 
   const handlePress = (song) => {
+    dispatch(resetAb());
     dispatch(stopSound()); // Stop any currently playing sound using the thunk
     dispatch(playSound(song.path)); // Play the selected song using the thunk
+    
   };  
 
   const getItem = (data, index) => data[index];
