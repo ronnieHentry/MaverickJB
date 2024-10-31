@@ -1,5 +1,10 @@
 import {createSlice} from '@reduxjs/toolkit';
 import Sound from 'react-native-sound';
+import {
+  incrementIndex,
+  selectCurrentSong,
+  setCurrentIndex,
+} from '../slices/songsSlice';
 
 // Hold the Sound instance outside Redux
 let soundInstance = null;
@@ -12,12 +17,21 @@ const playerSlice = createSlice({
     isPaused: false,
     playbackPosition: 0,
     duration: 0,
+    title: null,
+    artist: null,
+    album: null,
+    image: null,
   },
   reducers: {
     setCurrentSound: (state, action) => {
-      state.currentSoundPath = action.payload.path;
+      const {path, title, artist, album, image} = action.payload;
+      state.currentSoundPath = path;
       state.isPlaying = true;
       state.isPaused = false;
+      state.title = title || 'Unknown Title';
+      state.artist = artist || 'Unknown Artist';
+      state.album = album || 'Unknown Album';
+      state.image = image || 'No image';
     },
     clearCurrentSound: state => {
       state.currentSoundPath = null;
@@ -25,6 +39,9 @@ const playerSlice = createSlice({
       state.isPaused = false;
       state.playbackPosition = 0;
       state.duration = 0;
+      state.title = null;
+      state.artist = null;
+      state.album = null;
     },
     setPaused: (state, action) => {
       state.isPaused = action.payload;
@@ -50,26 +67,36 @@ export const {
   setDuration,
 } = playerSlice.actions;
 
-export const playSound = path => dispatch => {
+export const playSound = (song, index) => dispatch => {
   if (soundInstance) {
     soundInstance.stop().release();
   }
-
+  const {path, title, artist, album, image} = song;
   soundInstance = new Sound(path, Sound.MAIN_BUNDLE, error => {
     if (error) {
       console.error('Failed to load sound', error);
       return;
     }
-
     const duration = soundInstance.getDuration();
     dispatch(setDuration(duration));
 
     soundInstance.play(() => {
-      dispatch(clearCurrentSound());
+      dispatch(playNextSound());
     });
   });
 
-  dispatch(setCurrentSound({path}));
+  dispatch(setCurrentSound({path, title, artist, album, image}));
+  dispatch(setCurrentIndex(index));
+};
+
+export const playNextSound = () => (dispatch, getState) => {
+  dispatch(incrementIndex());
+  const nextSong = selectCurrentSong(getState());
+  if (nextSong) {
+    dispatch(playSound(nextSong, getState().songsSlice.currentIndex));
+  } else {
+    dispatch(clearCurrentSound());
+  }
 };
 
 export const stopSound = () => dispatch => {
@@ -95,8 +122,7 @@ export const playForward = () => dispatch => {
   if (soundInstance) {
     soundInstance.getCurrentTime(seconds => {
       const duration = soundInstance.getDuration(); // Get duration directly
-      const newPosition = Math.min(seconds + 3, duration); // Ensure it doesn’t exceed duration
-
+      const newPosition = Math.min(seconds + 10, duration); // Ensure it doesn’t exceed duration
       soundInstance.setCurrentTime(newPosition); // Set the updated position
     });
   }

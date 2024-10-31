@@ -18,27 +18,43 @@ import ToggleButtons from '../ReusableComponents/ToggleButtons';
 import {
   playBack,
   playForward,
+  playNextSound,
   seekToPosition,
   togglePlayPause,
   updatePlaybackPosition,
 } from '../../store/slices/playerSlice';
 import PlayerControls from '../ReusableComponents/PlayerControls';
+import ControlModal from '../ReusableComponents/ControlModal';
 
 const Player = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const {song} = route.params;
+  const [isPitchModalVisible, setPitchModalVisible] = useState(false);
+  const [isSpeedModalVisible, setSpeedModalVisible] = useState(false);
   const {eqOn, speedOn, pitchOn, abOn, shuffleOn, repeatOn} = useSelector(
     state => state.controlsSlice,
   );
-  const {isPlaying, playbackPosition, duration} = useSelector(
-    state => state.playerSlice,
-  );
+  const {title, artist, album, isPlaying, playbackPosition, duration, image} =
+    useSelector(state => state.playerSlice);
 
   const toggleButtons = [
     {label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq())},
-    {label: 'Speed', isActive: speedOn, onPress: () => dispatch(toggleSpeed())},
-    {label: 'Pitch', isActive: pitchOn, onPress: () => dispatch(togglePitch())},
+    {
+      label: 'Speed',
+      isActive: speedOn,
+      onPress: () => {
+        dispatch(toggleSpeed());
+        handleToggleSpeedModal();
+      },
+    },
+    {
+      label: 'Pitch',
+      isActive: pitchOn,
+      onPress: () => {
+        dispatch(togglePitch());
+        handleTogglePitchModal();
+      },
+    },
     {label: 'A-B', isActive: abOn, onPress: () => dispatch(toggleAb())},
   ];
 
@@ -78,7 +94,7 @@ const Player = ({route}) => {
     {
       name: 'play-skip-forward-outline',
       size: 48,
-      onPress: () => console.log('Skip Forward'),
+      onPress: () => dispatch(playNextSound()),
       iconColor: '#fff',
     },
     {
@@ -95,10 +111,25 @@ const Player = ({route}) => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [dispatch]);
+  }, []);
 
   const currentTime = formatTime(playbackPosition * duration);
   const totalTime = formatTime(duration);
+
+  const handleTogglePitchModal = () =>
+    setPitchModalVisible(!isPitchModalVisible);
+  const handleToggleSpeedModal = () =>
+    setSpeedModalVisible(!isSpeedModalVisible);
+
+  const handlePitchChange = pitch => {
+    console.log(`Current pitch: ${pitch}`);
+    // Apply pitch change logic
+  };
+
+  const handleSpeedChange = speed => {
+    console.log(`Current speed: ${speed}`);
+    // Apply speed change logic
+  };
 
   return (
     <View style={styles.container}>
@@ -111,11 +142,37 @@ const Player = ({route}) => {
           <Icon name="settings-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-      <Image source={getImageSource(song.image)} style={styles.image} />
-      <Text style={styles.title}>{song.title}</Text>
-      <Text style={styles.artist}>{song.artist}</Text>
+      <Image source={getImageSource(image)} style={styles.image} />
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.artist}>{artist}</Text>
 
       <ToggleButtons buttons={toggleButtons} />
+
+      {/* Pitch Modal */}
+      <ControlModal
+        visible={isPitchModalVisible}
+        onClose={handleTogglePitchModal}
+        onChangeValue={handlePitchChange}
+        initialLabel="Pitch x"
+        min={-12}
+        max={12}
+        step={0.1}
+        increments={[-0.25, -0.1, -0.05, -0.01, 0.01, 0.05, 0.1, 0.25]}
+        initialValue={0}
+      />
+
+      {/* Speed Modal */}
+      <ControlModal
+        visible={isSpeedModalVisible}
+        onClose={handleToggleSpeedModal}
+        onChangeValue={handleSpeedChange}
+        initialLabel="Speed x"
+        min={0.25}
+        max={5.0}
+        step={0.01}
+        increments={[-0.25, -0.1, -0.05, -0.01, 0.01, 0.05, 0.1, 0.25]}
+        initialValue={1.0}
+      />
 
       <View style={styles.sliderContainer}>
         <Text style={styles.time}>{currentTime}</Text>

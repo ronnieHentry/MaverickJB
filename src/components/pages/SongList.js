@@ -3,7 +3,7 @@ import {View, StyleSheet, VirtualizedList} from 'react-native';
 import {fetchMusicFilesMetadata} from '../utils/helper';
 import {setSongsList} from '../../store/slices/songsSlice';
 import {playSound, stopSound} from '../../store/slices/playerSlice';
-import { resetAb } from '../../store/slices/controlsSlice';
+import {resetAb} from '../../store/slices/controlsSlice';
 import SongItem from '../ReusableComponents/SongItem';
 import {useSelector, useDispatch} from 'react-redux';
 
@@ -24,12 +24,11 @@ const SongList = () => {
     loadSongs();
   }, []);
 
-  const handlePress = (song) => {
+  const handlePress = (song, index) => {
     dispatch(resetAb());
     dispatch(stopSound());
-    dispatch(playSound(song.path));
-    
-  };  
+    dispatch(playSound(song, index));
+  };
 
   const getItem = (data, index) => data[index];
   const getItemCount = data => data.length;
@@ -39,10 +38,13 @@ const SongList = () => {
       <VirtualizedList
         data={songs}
         initialNumToRender={10}
-        renderItem={({item}) => (
-          <SongItem item={item} onPress={() => handlePress(item)} />
+        renderItem={({item, index}) => (
+          <SongItem
+            item={item}
+            onPress={() => handlePress(item, index)} // Pass item and index
+          />
         )}
-        keyExtractor={item => item.id}
+        keyExtractor={(_, index) => index.toString()}
         getItem={getItem}
         getItemCount={getItemCount}
       />
