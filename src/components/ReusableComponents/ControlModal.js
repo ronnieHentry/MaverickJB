@@ -1,13 +1,14 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
   Modal,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
+import IncrementButtonGroup from './IncrementButtonGroup';
 
 const ControlModal = ({
   visible,
@@ -17,12 +18,15 @@ const ControlModal = ({
   min,
   max,
   step,
-  positiveIncrements=[+0.1, +0.25, +0.5, +1.0],
-  negativeIncrements=[-0.1, -0.25, -0.5, -1.0],
+  increments,
   value,
 }) => {
   const handleValueChange = val => {
-    onChangeValue(false, false, val);
+    onChangeValue(val);
+  };
+
+  const incrementValue = val => {
+    onChangeValue(val);
   };
 
   return (
@@ -34,7 +38,6 @@ const ControlModal = ({
               <Text style={styles.valueText}>
                 {label} {value.toFixed(2)}
               </Text>
-
               <Slider
                 style={styles.slider}
                 minimumValue={min}
@@ -46,30 +49,10 @@ const ControlModal = ({
                 value={value}
                 onValueChange={handleValueChange}
               />
-
-              <View style={styles.buttonRow}>
-                {/* {increments.map(inc => (
-                  <TouchableOpacity
-                    key={inc}
-                    style={styles.button}
-                    onPress={() => incrementValue(inc)}>
-                    <Text style={styles.buttonText}>
-                      {inc > 0 ? `+${inc}` : inc}
-                    </Text>
-                  </TouchableOpacity>
-                ))} */}
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => onChangeValue(false)}>
-                  <Text>Down</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => onChangeValue(true)}>
-                  <Text>Up</Text>
-                </TouchableOpacity>
-              </View>
-
+              <IncrementButtonGroup
+                increments={increments}
+                onPress={incrementValue}
+              />
               <View style={styles.footer}>
                 <TouchableOpacity
                   style={styles.controlButton}
@@ -79,7 +62,7 @@ const ControlModal = ({
                 <TouchableOpacity
                   style={styles.controlButton}
                   onPress={() => {
-                    onChangeValue(false, true);
+                    onChangeValue(0, true);
                   }}>
                   <Text style={styles.controlButtonText}>Reset</Text>
                 </TouchableOpacity>
@@ -115,24 +98,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 40,
     marginBottom: 20,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  button: {
-    width: '23%',
-    margin: 5,
-    backgroundColor: '#333',
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 14,
   },
   footer: {
     flexDirection: 'row',

@@ -27,6 +27,12 @@ import {
 } from '../../store/slices/playerSlice';
 import PlayerControls from '../ReusableComponents/PlayerControls';
 import ControlModal from '../ReusableComponents/ControlModal';
+import {
+  NEGATIVE_PITCH_INCREMENTS,
+  NEGATIVE_SPEED_INCREMENTS,
+  POSITIVE_PITCH_INCREMENTS,
+  POSITIVE_SPEED_INCREMENTS,
+} from '../utils/constants';
 
 const Player = ({route}) => {
   const navigation = useNavigation();
@@ -45,6 +51,7 @@ const Player = ({route}) => {
     duration,
     image,
     pitch,
+    speed
   } = useSelector(state => state.playerSlice);
 
   const toggleButtons = [
@@ -147,23 +154,21 @@ const Player = ({route}) => {
 
       <ToggleButtons buttons={toggleButtons} />
 
-      {/* Pitch Control Modal */}
       <ControlModal
         visible={isPitchModalVisible}
         onClose={() => setPitchModalVisible(false)}
-        onChangeValue={(increase, reset) =>
-          dispatch(adjustPitch(increase, reset))
-        }
+        onChangeValue={(val, reset) => dispatch(adjustPitch(val, reset))}
         label="Pitch"
         min={-12}
         max={12}
         step={1}
-        positiveIncrements={[+0.1, +0.25, +0.5, +1.0]}
-        negativeIncrements={[-0.1, -0.25, -0.5, -1.0]}
+        increments={{
+          negative: NEGATIVE_PITCH_INCREMENTS,
+          positive: POSITIVE_PITCH_INCREMENTS,
+        }}
         value={pitch}
       />
 
-      {/* Speed Control Modal */}
       <ControlModal
         visible={isSpeedModalVisible}
         onClose={() => setSpeedModalVisible(false)}
@@ -171,10 +176,13 @@ const Player = ({route}) => {
         label="Speed"
         min={0.25}
         max={5.0}
-        step={0.1}
-        increments={[-0.25, -0.1, -0.01, -0.05, +0.05, +0.01, +0.1, +0.25]}
+        step={0.05}
+        increments={{
+          negative: NEGATIVE_SPEED_INCREMENTS,
+          positive: POSITIVE_SPEED_INCREMENTS,
+        }}
         initialValue={1}
-        value={pitch}
+        value={speed}
       />
 
       <View style={styles.sliderContainer}>

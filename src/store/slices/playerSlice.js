@@ -22,6 +22,7 @@ const playerSlice = createSlice({
     album: null,
     image: null,
     pitch: 0,
+    speed: 1,
   },
   reducers: {
     setCurrentSound: (state, action) => {
@@ -56,22 +57,9 @@ const playerSlice = createSlice({
     setDuration: (state, action) => {
       state.duration = action.payload;
     },
-    increasePitch: state => {
-      if (state.pitch < 12) {
-        state.pitch += 1;
-      }
-    },
-    decreasePitch: state => {
-      if (state.pitch > -12) {
-        state.pitch -= 1;
-      }
-    },
-    resetPitch: state => {
-      state.pitch = 0;
-    },
     setPitch: (state, action) => {
       if (action.payload >= -12 && action.payload <= 12) {
-        state.pitch = action.payload; // Set pitch directly
+        state.pitch = action.payload;
       }
     },
   },
@@ -84,9 +72,6 @@ export const {
   setPlaying,
   setPlaybackPosition,
   setDuration,
-  increasePitch,
-  decreasePitch,
-  resetPitch,
   setPitch,
 } = playerSlice.actions;
 
@@ -109,7 +94,6 @@ export const playSound = (song, index) => (dispatch, getState) => {
       dispatch(playNextSound());
     });
   });
-
   dispatch(setCurrentSound({path, title, artist, album, image}));
   dispatch(setCurrentIndex(index));
 };
@@ -142,18 +126,16 @@ export const playBack = () => dispatch => {
   }
 };
 
-// Thunk to fast forward the sound by 3 seconds
 export const playForward = () => dispatch => {
   if (soundInstance) {
     soundInstance.getCurrentTime(seconds => {
-      const duration = soundInstance.getDuration(); // Get duration directly
-      const newPosition = Math.min(seconds + 10, duration); // Ensure it doesn’t exceed duration
-      soundInstance.setCurrentTime(newPosition); // Set the updated position
+      const duration = soundInstance.getDuration();
+      const newPosition = Math.min(seconds + 10, duration);
+      soundInstance.setCurrentTime(newPosition);
     });
   }
 };
 
-// Thunk for play/pause functionality
 export const togglePlayPause = () => (dispatch, getState) => {
   const {isPlaying, isPaused} = getState().playerSlice;
 
@@ -192,24 +174,21 @@ export const updatePlaybackPosition = () => dispatch => {
   }
 };
 
-// Thunk to adjust pitch
 export const adjustPitch =
-  (increase, reset = false, pitchValue = null) =>
+  (pitchChange = 0, reset = false) =>
   (dispatch, getState) => {
-    if (reset) {
-      dispatch(resetPitch());
-    } else if (pitchValue !== null) {
-      // Set pitch directly based on the slider value
-      dispatch(setPitch(pitchValue)); // New action to set pitch directly
-    } else if (increase) {
-      dispatch(increasePitch());
-    } else {
-      dispatch(decreasePitch());
-    }
+    let newPitch = 0;
 
-    const {pitch} = getState().playerSlice;
+    if (reset) {
+      newPitch = 0;
+    } else {
+      const {pitch} = getState().playerSlice;
+      newPitch = pitch + pitchChange;
+    }
+    dispatch(setPitch(Math.pow(2, newPitch / 12)));
+
     if (soundInstance) {
-      soundInstance.setPitch(Math.pow(2, pitch / 12)); // Apply new pitch
+      soundInstance.setPitch(Math.pow(2, newPitch / 12));
     }
   };
 
