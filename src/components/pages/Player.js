@@ -16,6 +16,8 @@ import {
 } from '../../store/slices/controlsSlice';
 import ToggleButtons from '../ReusableComponents/ToggleButtons';
 import {
+  adjustPitch,
+  increasePitch,
   playBack,
   playForward,
   playNextSound,
@@ -34,8 +36,16 @@ const Player = ({route}) => {
   const {eqOn, speedOn, pitchOn, abOn, shuffleOn, repeatOn} = useSelector(
     state => state.controlsSlice,
   );
-  const {title, artist, album, isPlaying, playbackPosition, duration, image} =
-    useSelector(state => state.playerSlice);
+  const {
+    title,
+    artist,
+    album,
+    isPlaying,
+    playbackPosition,
+    duration,
+    image,
+    pitch,
+  } = useSelector(state => state.playerSlice);
 
   const toggleButtons = [
     {label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq())},
@@ -49,7 +59,7 @@ const Player = ({route}) => {
     },
     {
       label: 'Pitch',
-      isActive: pitchOn,
+      isActive: pitch !== 0,
       onPress: () => {
         dispatch(togglePitch());
         handleTogglePitchModal();
@@ -109,9 +119,8 @@ const Player = ({route}) => {
     const interval = setInterval(() => {
       dispatch(updatePlaybackPosition());
     }, 1000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [dispatch]);
 
   const currentTime = formatTime(playbackPosition * duration);
   const totalTime = formatTime(duration);
@@ -120,16 +129,6 @@ const Player = ({route}) => {
     setPitchModalVisible(!isPitchModalVisible);
   const handleToggleSpeedModal = () =>
     setSpeedModalVisible(!isSpeedModalVisible);
-
-  const handlePitchChange = pitch => {
-    console.log(`Current pitch: ${pitch}`);
-    // Apply pitch change logic
-  };
-
-  const handleSpeedChange = speed => {
-    console.log(`Current speed: ${speed}`);
-    // Apply speed change logic
-  };
 
   return (
     <View style={styles.container}>
@@ -148,30 +147,34 @@ const Player = ({route}) => {
 
       <ToggleButtons buttons={toggleButtons} />
 
-      {/* Pitch Modal */}
+      {/* Pitch Control Modal */}
       <ControlModal
         visible={isPitchModalVisible}
-        onClose={handleTogglePitchModal}
-        onChangeValue={handlePitchChange}
-        initialLabel="Pitch x"
+        onClose={() => setPitchModalVisible(false)}
+        onChangeValue={(increase, reset) =>
+          dispatch(adjustPitch(increase, reset))
+        }
+        label="Pitch"
         min={-12}
         max={12}
-        step={0.1}
-        increments={[-0.25, -0.1, -0.05, -0.01, 0.01, 0.05, 0.1, 0.25]}
-        initialValue={0}
+        step={1}
+        positiveIncrements={[+0.1, +0.25, +0.5, +1.0]}
+        negativeIncrements={[-0.1, -0.25, -0.5, -1.0]}
+        value={pitch}
       />
 
-      {/* Speed Modal */}
+      {/* Speed Control Modal */}
       <ControlModal
         visible={isSpeedModalVisible}
-        onClose={handleToggleSpeedModal}
-        onChangeValue={handleSpeedChange}
-        initialLabel="Speed x"
+        onClose={() => setSpeedModalVisible(false)}
+        // onChangeValue={newSpeed => dispatch(adjustSpeed(newSpeed))}
+        label="Speed"
         min={0.25}
         max={5.0}
-        step={0.01}
-        increments={[-0.25, -0.1, -0.05, -0.01, 0.01, 0.05, 0.1, 0.25]}
-        initialValue={1.0}
+        step={0.1}
+        increments={[-0.25, -0.1, -0.01, -0.05, +0.05, +0.01, +0.1, +0.25]}
+        initialValue={1}
+        value={pitch}
       />
 
       <View style={styles.sliderContainer}>

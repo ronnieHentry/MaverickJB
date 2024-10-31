@@ -21,6 +21,7 @@ const playerSlice = createSlice({
     artist: null,
     album: null,
     image: null,
+    pitch: 0,
   },
   reducers: {
     setCurrentSound: (state, action) => {
@@ -55,6 +56,24 @@ const playerSlice = createSlice({
     setDuration: (state, action) => {
       state.duration = action.payload;
     },
+    increasePitch: state => {
+      if (state.pitch < 12) {
+        state.pitch += 1;
+      }
+    },
+    decreasePitch: state => {
+      if (state.pitch > -12) {
+        state.pitch -= 1;
+      }
+    },
+    resetPitch: state => {
+      state.pitch = 0;
+    },
+    setPitch: (state, action) => {
+      if (action.payload >= -12 && action.payload <= 12) {
+        state.pitch = action.payload; // Set pitch directly
+      }
+    },
   },
 });
 
@@ -65,9 +84,13 @@ export const {
   setPlaying,
   setPlaybackPosition,
   setDuration,
+  increasePitch,
+  decreasePitch,
+  resetPitch,
+  setPitch,
 } = playerSlice.actions;
 
-export const playSound = (song, index) => dispatch => {
+export const playSound = (song, index) => (dispatch, getState) => {
   if (soundInstance) {
     soundInstance.stop().release();
   }
@@ -77,6 +100,8 @@ export const playSound = (song, index) => dispatch => {
       console.error('Failed to load sound', error);
       return;
     }
+    const {pitch} = getState().playerSlice;
+    soundInstance.setPitch(Math.pow(2, pitch / 12));
     const duration = soundInstance.getDuration();
     dispatch(setDuration(duration));
 
@@ -166,5 +191,26 @@ export const updatePlaybackPosition = () => dispatch => {
     });
   }
 };
+
+// Thunk to adjust pitch
+export const adjustPitch =
+  (increase, reset = false, pitchValue = null) =>
+  (dispatch, getState) => {
+    if (reset) {
+      dispatch(resetPitch());
+    } else if (pitchValue !== null) {
+      // Set pitch directly based on the slider value
+      dispatch(setPitch(pitchValue)); // New action to set pitch directly
+    } else if (increase) {
+      dispatch(increasePitch());
+    } else {
+      dispatch(decreasePitch());
+    }
+
+    const {pitch} = getState().playerSlice;
+    if (soundInstance) {
+      soundInstance.setPitch(Math.pow(2, pitch / 12)); // Apply new pitch
+    }
+  };
 
 export default playerSlice.reducer;

@@ -1,75 +1,93 @@
 import React, {useState} from 'react';
-import {View, Text, Modal, TouchableOpacity, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  StyleSheet,
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 
 const ControlModal = ({
   visible,
   onClose,
   onChangeValue,
-  initialLabel,
+  label,
   min,
   max,
   step,
-  increments,
-  initialValue = 0,
+  positiveIncrements=[+0.1, +0.25, +0.5, +1.0],
+  negativeIncrements=[-0.1, -0.25, -0.5, -1.0],
+  value,
 }) => {
-  const [value, setValue] = useState(initialValue);
-
   const handleValueChange = val => {
-    setValue(val);
-    onChangeValue(val);
-  };
-
-  const incrementValue = increment => {
-    let newValue = value + increment;
-    if (newValue > max) newValue = max;
-    if (newValue < min) newValue = min;
-    setValue(newValue);
-    onChangeValue(newValue);
+    onChangeValue(false, false, val);
   };
 
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.valueText}>
-            {initialLabel} {value.toFixed(2)}
-          </Text>
-          <Slider
-            style={styles.slider}
-            minimumValue={min}
-            maximumValue={max}
-            step={step}
-            minimumTrackTintColor="#1fb28a"
-            maximumTrackTintColor="#d3d3d3"
-            thumbTintColor="#1fb28a"
-            value={value}
-            onValueChange={handleValueChange}
-          />
-          <View style={styles.buttonRow}>
-            {increments.map(inc => (
-              <TouchableOpacity
-                key={inc}
-                style={styles.button}
-                onPress={() => incrementValue(inc)}>
-                <Text style={styles.buttonText}>
-                  {inc > 0 ? `+${inc}` : inc}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <View style={styles.footer}>
-            <TouchableOpacity style={styles.controlButton} onPress={onClose}>
-              <Text style={styles.controlButtonText}>Close</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => setValue(initialValue)}>
-              <Text style={styles.controlButtonText}>Reset</Text>
-            </TouchableOpacity>
-          </View>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.modalContainer}>
+          <TouchableWithoutFeedback>
+            <View style={styles.modalContent}>
+              <Text style={styles.valueText}>
+                {label} {value.toFixed(2)}
+              </Text>
+
+              <Slider
+                style={styles.slider}
+                minimumValue={min}
+                maximumValue={max}
+                step={step}
+                minimumTrackTintColor="#1fb28a"
+                maximumTrackTintColor="#d3d3d3"
+                thumbTintColor="#1fb28a"
+                value={value}
+                onValueChange={handleValueChange}
+              />
+
+              <View style={styles.buttonRow}>
+                {/* {increments.map(inc => (
+                  <TouchableOpacity
+                    key={inc}
+                    style={styles.button}
+                    onPress={() => incrementValue(inc)}>
+                    <Text style={styles.buttonText}>
+                      {inc > 0 ? `+${inc}` : inc}
+                    </Text>
+                  </TouchableOpacity>
+                ))} */}
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => onChangeValue(false)}>
+                  <Text>Down</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => onChangeValue(true)}>
+                  <Text>Up</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={styles.controlButton}
+                  onPress={onClose}>
+                  <Text style={styles.controlButtonText}>Close</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.controlButton}
+                  onPress={() => {
+                    onChangeValue(false, true);
+                  }}>
+                  <Text style={styles.controlButtonText}>Reset</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -101,7 +119,7 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     width: '100%',
   },
   button: {
