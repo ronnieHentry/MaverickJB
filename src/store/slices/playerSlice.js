@@ -5,8 +5,8 @@ import {
   selectCurrentSong,
   setCurrentIndex,
 } from '../slices/songsSlice';
+import {getPitchMultiplier} from '../../components/utils/helper';
 
-// Hold the Sound instance outside Redux
 let soundInstance = null;
 
 const playerSlice = createSlice({
@@ -21,7 +21,7 @@ const playerSlice = createSlice({
     artist: null,
     album: null,
     image: null,
-    pitch: 0,
+    pitch: 1,
     speed: 1,
   },
   reducers: {
@@ -58,9 +58,7 @@ const playerSlice = createSlice({
       state.duration = action.payload;
     },
     setPitch: (state, action) => {
-      if (action.payload >= -12 && action.payload <= 12) {
-        state.pitch = action.payload;
-      }
+      state.pitch = action.payload;
     },
   },
 });
@@ -174,21 +172,30 @@ export const updatePlaybackPosition = () => dispatch => {
   }
 };
 
+const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+
 export const adjustPitch =
   (pitchChange = 0, reset = false) =>
   (dispatch, getState) => {
-    let newPitch = 0;
+    let newPitch = 1;
 
     if (reset) {
-      newPitch = 0;
+      newPitch = 0; // Reset pitch in semitones to zero
     } else {
       const {pitch} = getState().playerSlice;
       newPitch = pitch + pitchChange;
+
+      // Clamp newPitch between -12 and 12 to limit to one octave up/down
+      newPitch = clamp(newPitch, -12, 12);
     }
-    dispatch(setPitch(Math.pow(2, newPitch / 12)));
+
+    // Dispatch the clamped pitch value in semitones to Redux state
+    dispatch(setPitch(newPitch));
 
     if (soundInstance) {
-      soundInstance.setPitch(Math.pow(2, newPitch / 12));
+      // Calculate the pitch multiplier based on semitone changes
+      const pitchMultiplier = getPitchMultiplier(newPitch);
+      soundInstance.setPitch(pitchMultiplier);
     }
   };
 

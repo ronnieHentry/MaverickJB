@@ -67,3 +67,7 @@ export const formatTime = timeInSeconds => {
     '0',
   )}`;
 };
+
+export const getPitchMultiplier = semitoneChange => {
+  return Math.pow(2, semitoneChange / 12);
+};

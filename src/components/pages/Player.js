@@ -51,7 +51,7 @@ const Player = ({route}) => {
     duration,
     image,
     pitch,
-    speed
+    speed,
   } = useSelector(state => state.playerSlice);
 
   const toggleButtons = [
@@ -66,7 +66,7 @@ const Player = ({route}) => {
     },
     {
       label: 'Pitch',
-      isActive: pitch !== 0,
+      isActive: pitch !== 1,
       onPress: () => {
         dispatch(togglePitch());
         handleTogglePitchModal();
@@ -157,7 +157,10 @@ const Player = ({route}) => {
       <ControlModal
         visible={isPitchModalVisible}
         onClose={() => setPitchModalVisible(false)}
-        onChangeValue={(val, reset) => dispatch(adjustPitch(val, reset))}
+        onChangeValue={(val, reset) => {
+          dispatch(adjustPitch(val, reset));
+          console.log(val);
+        }}
         label="Pitch"
         min={-12}
         max={12}
