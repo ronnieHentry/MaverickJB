@@ -16,11 +16,11 @@ const controlsSlice = createSlice({
     toggleEq: state => {
       state.eqOn = !state.eqOn;
     },
-    toggleSpeed: state => {
-      state.speedOn = !state.speedOn;
+    toggleSpeed: (state, action) => {
+      state.speedOn = action.payload !== 1;
     },
-    togglePitch: state => {
-      state.pitchOn = !state.pitchOn;
+    togglePitch: (state, action) => {
+      state.pitchOn = action.payload !== 0;
     },
     toggleAb: state => {
       state.abOn = !state.abOn;

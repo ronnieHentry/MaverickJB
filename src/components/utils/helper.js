@@ -71,3 +71,5 @@ export const formatTime = timeInSeconds => {
 export const getPitchMultiplier = semitoneChange => {
   return Math.pow(2, semitoneChange / 12);
 };
+
+export const clamp = (value, min, max) => Math.max(min, Math.min(value, max));

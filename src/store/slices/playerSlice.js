@@ -5,7 +5,7 @@ import {
   selectCurrentSong,
   setCurrentIndex,
 } from '../slices/songsSlice';
-import {getPitchMultiplier} from '../../components/utils/helper';
+import {clamp, getPitchMultiplier} from '../../components/utils/helper';
 
 let soundInstance = null;
 
@@ -21,7 +21,7 @@ const playerSlice = createSlice({
     artist: null,
     album: null,
     image: null,
-    pitch: 1,
+    pitch: 0,
     speed: 1,
   },
   reducers: {
@@ -60,6 +60,9 @@ const playerSlice = createSlice({
     setPitch: (state, action) => {
       state.pitch = action.payload;
     },
+    setSpeed: (state, action) => {
+      state.speed = action.payload;
+    },
   },
 });
 
@@ -71,6 +74,7 @@ export const {
   setPlaybackPosition,
   setDuration,
   setPitch,
+  setSpeed
 } = playerSlice.actions;
 
 export const playSound = (song, index) => (dispatch, getState) => {
@@ -98,9 +102,10 @@ export const playSound = (song, index) => (dispatch, getState) => {
 
 export const playNextSound = () => (dispatch, getState) => {
   dispatch(incrementIndex());
-  const nextSong = selectCurrentSong(getState());
+  const updatedState = getState(); // Get updated state after dispatch
+  const nextSong = selectCurrentSong(updatedState);
   if (nextSong) {
-    dispatch(playSound(nextSong, getState().songsSlice.currentIndex));
+    dispatch(playSound(nextSong, updatedState.songsSlice.currentIndex));
   } else {
     dispatch(clearCurrentSound());
   }
@@ -153,7 +158,7 @@ export const togglePlayPause = () => (dispatch, getState) => {
 };
 
 export const seekToPosition = normalizedPosition => dispatch => {
-  if (soundInstance) {
+  if (soundInstance) {  
     const duration = soundInstance.getDuration();
     const targetPosition = normalizedPosition * duration;
 
@@ -163,7 +168,7 @@ export const seekToPosition = normalizedPosition => dispatch => {
 };
 
 export const updatePlaybackPosition = () => dispatch => {
-  if (soundInstance && soundInstance.isPlaying()) {
+  if (soundInstance) {
     soundInstance.getCurrentTime(seconds => {
       const duration = soundInstance.getDuration();
       const normalizedPosition = seconds / duration;
@@ -171,8 +176,6 @@ export const updatePlaybackPosition = () => dispatch => {
     });
   }
 };
-
-const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
 
 export const adjustPitch =
   (pitchChange = 0, reset = false) =>
@@ -196,6 +199,30 @@ export const adjustPitch =
       // Calculate the pitch multiplier based on semitone changes
       const pitchMultiplier = getPitchMultiplier(newPitch);
       soundInstance.setPitch(pitchMultiplier);
+    }
+  };
+
+export const adjustSpeed =
+  (speedChange = 0, reset = false) =>
+  (dispatch, getState) => {
+    let newSpeed = 1;
+
+    if (reset) {
+      newSpeed = 1; // Reset speed to 1 (normal speed)
+    } else {
+      const {speed} = getState().playerSlice;
+      newSpeed = speed + speedChange;
+
+      // Clamp newSpeed between 0.25 and 5.0 to limit the speed range
+      newSpeed = clamp(newSpeed, 0.25, 5.0);
+    }
+
+    // Dispatch the clamped speed value to Redux state
+    dispatch(setSpeed(newSpeed));
+
+    if (soundInstance) {
+      // Apply the new speed multiplier to the sound instance
+      soundInstance.setSpeed(newSpeed);
     }
   };
 

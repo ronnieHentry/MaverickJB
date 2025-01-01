@@ -17,6 +17,7 @@ import {
 import ToggleButtons from '../ReusableComponents/ToggleButtons';
 import {
   adjustPitch,
+  adjustSpeed,
   increasePitch,
   playBack,
   playForward,
@@ -58,17 +59,17 @@ const Player = ({route}) => {
     {label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq())},
     {
       label: 'Speed',
-      isActive: speedOn,
+      isActive: speed !== 1,
       onPress: () => {
-        dispatch(toggleSpeed());
+        dispatch(toggleSpeed(speed));
         handleToggleSpeedModal();
       },
     },
     {
       label: 'Pitch',
-      isActive: pitch !== 1,
+      isActive: pitch !== 0,
       onPress: () => {
-        dispatch(togglePitch());
+        dispatch(togglePitch(pitch));
         handleTogglePitchModal();
       },
     },
@@ -124,7 +125,7 @@ const Player = ({route}) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      dispatch(updatePlaybackPosition());
+      dispatch(updatePlaybackPosition());      
     }, 1000);
     return () => clearInterval(interval);
   }, [dispatch]);
@@ -159,7 +160,6 @@ const Player = ({route}) => {
         onClose={() => setPitchModalVisible(false)}
         onChangeValue={(val, reset) => {
           dispatch(adjustPitch(val, reset));
-          console.log(val);
         }}
         label="Pitch"
         min={-12}
@@ -175,7 +175,9 @@ const Player = ({route}) => {
       <ControlModal
         visible={isSpeedModalVisible}
         onClose={() => setSpeedModalVisible(false)}
-        // onChangeValue={newSpeed => dispatch(adjustSpeed(newSpeed))}
+        onChangeValue={(val, reset) => {
+          dispatch(adjustSpeed(val, reset));
+        }}
         label="Speed"
         min={0.25}
         max={5.0}
