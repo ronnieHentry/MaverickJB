@@ -18,7 +18,6 @@ import ToggleButtons from '../ReusableComponents/ToggleButtons';
 import {
   adjustPitch,
   adjustSpeed,
-  increasePitch,
   playBack,
   playForward,
   playNextSound,
@@ -125,7 +124,7 @@ const Player = ({route}) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      dispatch(updatePlaybackPosition());      
+      dispatch(updatePlaybackPosition());   
     }, 1000);
     return () => clearInterval(interval);
   }, [dispatch]);

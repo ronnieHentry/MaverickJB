@@ -74,7 +74,7 @@ export const {
   setPlaybackPosition,
   setDuration,
   setPitch,
-  setSpeed
+  setSpeed,
 } = playerSlice.actions;
 
 export const playSound = (song, index) => (dispatch, getState) => {
@@ -93,7 +93,7 @@ export const playSound = (song, index) => (dispatch, getState) => {
     dispatch(setDuration(duration));
 
     soundInstance.play(() => {
-      dispatch(playNextSound());
+        dispatch(playNextSound());
     });
   });
   dispatch(setCurrentSound({path, title, artist, album, image}));
@@ -158,7 +158,7 @@ export const togglePlayPause = () => (dispatch, getState) => {
 };
 
 export const seekToPosition = normalizedPosition => dispatch => {
-  if (soundInstance) {  
+  if (soundInstance) {
     const duration = soundInstance.getDuration();
     const targetPosition = normalizedPosition * duration;
 
@@ -224,6 +224,6 @@ export const adjustSpeed =
       // Apply the new speed multiplier to the sound instance
       soundInstance.setSpeed(newSpeed);
     }
-  };
+};
 
 export default playerSlice.reducer;
