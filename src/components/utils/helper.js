@@ -46,7 +46,7 @@ export const getImageSource = image => {
   if (typeof image === 'string') {
     return {uri: image};
   }
-  return image;
+  return image || defaultImage;
 };
 
 // Handle play/pause button toggle
