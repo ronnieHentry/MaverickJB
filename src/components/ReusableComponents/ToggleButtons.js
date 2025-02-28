@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
   buttonLabel: {
     color: '#d3d3d3',
-    fontSize: 11,
+    fontSize: 10,
     marginTop: 5,
   },
   bar: {

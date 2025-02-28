@@ -2,6 +2,8 @@ import React from 'react';
 import {TouchableOpacity, View, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
+
+// Shuffle, Back, Skip Back, Play/Pause etc buttons
 const PlayerControls = ({buttons, iconColor = '#fff'}) => {
   return (
     <>

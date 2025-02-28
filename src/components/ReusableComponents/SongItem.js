@@ -1,9 +1,8 @@
 import React from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 
-const SongItem = React.memo(({item, onPress}) => {
-  const navigation = useNavigation();
+const SongItem = React.memo(({item, onPress, isPlaying}) => {
+  // const playingGif = require("../../../assets/Playing")
   const imageSource =
     typeof item.image === 'string' ? {uri: item.image} : item.image;
 
@@ -11,7 +10,6 @@ const SongItem = React.memo(({item, onPress}) => {
     <TouchableOpacity
       onPress={() => {
         onPress();
-        navigation.navigate('Player', {song: item});
       }}>
       <View style={styles.songContainer}>
         <Image source={imageSource} style={styles.image} />
@@ -20,7 +18,14 @@ const SongItem = React.memo(({item, onPress}) => {
           <Text style={styles.artist}>{item.artist}</Text>
         </View>
         <TouchableOpacity style={styles.playButton}>
-          <Text style={styles.playText}>▶</Text>
+          {isPlaying ? (
+            <Image
+              source={require('../../../assets/Playing.gif')} // Path to your GIF
+              style={styles.gif}
+            />
+          ) : (
+            <Text style={styles.playText}>▶</Text>
+          )}
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -60,6 +65,10 @@ const styles = StyleSheet.create({
   playText: {
     color: '#ff0000',
     fontSize: 20,
+  },
+  gif: {
+    width: 40,
+    height: 40,
   },
 });
 

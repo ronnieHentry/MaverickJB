@@ -6,9 +6,14 @@ import {
   TouchableWithoutFeedback,
   StyleSheet,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import IncrementButtonGroup from './IncrementButtonGroup';
+
+const {width} = Dimensions.get('window');
+
+// Modal that opens up on pressing Speed, Pitch
 
 const ControlModal = ({
   visible,
@@ -35,8 +40,11 @@ const ControlModal = ({
         <View style={styles.modalContainer}>
           <TouchableWithoutFeedback>
             <View style={styles.modalContent}>
-              <Text style={styles.valueText}>
-                {label} {value.toFixed(2)}
+              <Text
+                style={styles.valueText}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                {label}: {value.toFixed(2)}
               </Text>
               <Slider
                 style={styles.slider}
@@ -83,7 +91,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
   },
   modalContent: {
-    width: '90%',
+    width: width * 0.9, // 90% of screen width
     backgroundColor: '#1c1c1c',
     borderRadius: 10,
     padding: 20,
@@ -93,6 +101,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#ffffff',
     marginBottom: 10,
+    width: '100%', // Fixed width to prevent overflow
+    textAlign: 'center',
   },
   slider: {
     width: '100%',
@@ -115,7 +125,7 @@ const styles = StyleSheet.create({
   },
   controlButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
   },
 });
 

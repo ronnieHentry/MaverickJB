@@ -1,16 +1,22 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
-import {formatTime, getImageSource, handleToggle} from '../utils/helper';
+import {formatTime, getImageSource} from '../utils/helper';
 import {
   toggleEq,
   toggleSpeed,
   togglePitch,
   toggleAb,
-  resetAb,
   toggleShuffle,
   toggleRepeat,
 } from '../../store/slices/controlsSlice';
@@ -33,8 +39,12 @@ import {
   POSITIVE_PITCH_INCREMENTS,
   POSITIVE_SPEED_INCREMENTS,
 } from '../utils/constants';
+import { SharedElement } from 'react-navigation-shared-element';
+
+const {width} = Dimensions.get('window'); // Get screen width for responsive design
 
 const Player = ({route}) => {
+  const {index} = route.params;
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [isPitchModalVisible, setPitchModalVisible] = useState(false);
@@ -124,7 +134,7 @@ const Player = ({route}) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      dispatch(updatePlaybackPosition());   
+      dispatch(updatePlaybackPosition());
     }, 1000);
     return () => clearInterval(interval);
   }, [dispatch]);
@@ -148,9 +158,15 @@ const Player = ({route}) => {
           <Icon name="settings-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-      <Image source={getImageSource(image)} style={styles.image} />
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.artist}>{artist}</Text>
+      <SharedElement id={`song-${index}`}>
+        <Image source={getImageSource(image)} style={styles.image} />
+      </SharedElement>
+      <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+        {title}
+      </Text>
+      <Text style={styles.artist} numberOfLines={1} ellipsizeMode="tail">
+        {artist}
+      </Text>
 
       <ToggleButtons buttons={toggleButtons} />
 
@@ -232,8 +248,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   image: {
-    width: 300,
-    height: 300,
+    width: width * 0.8,
+    height: width * 0.8,
     borderRadius: 15,
     marginBottom: 20,
   },
@@ -243,38 +259,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginVertical: 10,
+    width: '90%',
   },
   artist: {
     color: '#d3d3d3',
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 30,
-  },
-  button: {
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#333',
-    borderRadius: 10,
-    width: '22%',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 9,
-    marginBottom: 5,
-  },
-  buttonLabel: {
-    color: '#d3d3d3',
-    fontSize: 11,
-    marginTop: 5,
-  },
-  bar: {
-    height: 4,
-    width: '100%',
-    backgroundColor: '#555',
-    marginVertical: 5,
-  },
-  barOn: {
-    backgroundColor: '#ff0000',
+    width: '90%', // Fixed width to prevent overflow
   },
   sliderContainer: {
     flexDirection: 'row',
@@ -286,10 +278,13 @@ const styles = StyleSheet.create({
   time: {
     color: '#d3d3d3',
     fontSize: 14,
+    width: 50, // Fixed width for time labels
+    textAlign: 'center',
   },
   slider: {
     flex: 1,
     height: 40,
+    marginHorizontal: 10, // Add margin to prevent overlap
   },
   buttons: {
     flexDirection: 'row',
