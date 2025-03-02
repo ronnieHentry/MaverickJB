@@ -20,7 +20,7 @@ const SongItem = React.memo(({item, onPress, isPlaying}) => {
         <TouchableOpacity style={styles.playButton}>
           {isPlaying ? (
             <Image
-              source={require('../../../assets/Playing.gif')} // Path to your GIF
+              source={require('../../../assets/Playing.gif')}
               style={styles.gif}
             />
           ) : (

@@ -11,10 +11,8 @@ import MiniPlayer from '../ReusableComponents/MiniPlayer';
 const SongList = () => {
   const dispatch = useDispatch();
   const {songs} = useSelector(state => state.songsSlice);
-  const {currentSoundPath, isPlaying} = useSelector(state => state.playerSlice);
-
-  const [currentSong, setCurrentSong] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(null);
+  const {isPlaying, isPaused} = useSelector(state => state.playerSlice);
+  const {currentIndex} = useSelector(state => state.songsSlice);
 
   useEffect(() => {
     const loadSongs = async () => {
@@ -33,8 +31,6 @@ const SongList = () => {
     dispatch(resetAb());
     dispatch(stopSound());
     dispatch(playSound(song, index));
-    setCurrentSong(song);
-    setCurrentIndex(index);
   };
 
   const getItem = (data, index) => data[index];
@@ -48,15 +44,16 @@ const SongList = () => {
         renderItem={({item, index}) => (
           <SongItem
             item={item}
-            onPress={() => handlePress(item, index)} // Pass item and index
+            onPress={() => handlePress(item, index)}
             isPlaying={currentIndex === index && isPlaying}
           />
         )}
         keyExtractor={(_, index) => index.toString()}
         getItem={getItem}
         getItemCount={getItemCount}
+        contentContainerStyle={{paddingBottom: 80}}
       />
-      {currentSong && <MiniPlayer song={currentSong} index={currentIndex} />}
+      {(isPlaying || isPaused) && <MiniPlayer />}
     </View>
   );
 };

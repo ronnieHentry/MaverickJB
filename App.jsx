@@ -21,7 +21,14 @@ const App = () => {
               component={Player}
               sharedElements={route => {
                 const {index} = route.params;
-                return [`song-${index}`];
+                return [
+                  {
+                    id: `song-${index}`,
+                    animation: 'move',
+                    resize: 'auto',
+                    align: 'center-top',
+                  },
+                ];
               }}
             />
           </Stack.Navigator>
