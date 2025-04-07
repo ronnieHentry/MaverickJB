@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, VirtualizedList} from 'react-native';
+import React, {useEffect, useState, useMemo, useCallback} from 'react';
+import {View, StyleSheet, VirtualizedList, TextInput} from 'react-native';
 import {fetchMusicFilesMetadata} from '../utils/helper';
 import {setSongsList} from '../../store/slices/songsSlice';
 import {playSound, stopSound} from '../../store/slices/playerSlice';
@@ -10,9 +10,9 @@ import MiniPlayer from '../ReusableComponents/MiniPlayer';
 
 const SongList = () => {
   const dispatch = useDispatch();
-  const {songs} = useSelector(state => state.songsSlice);
+  const {songs, currentIndex} = useSelector(state => state.songsSlice);
   const {isPlaying, isPaused} = useSelector(state => state.playerSlice);
-  const {currentIndex} = useSelector(state => state.songsSlice);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const loadSongs = async () => {
@@ -27,32 +27,55 @@ const SongList = () => {
     loadSongs();
   }, []);
 
-  const handlePress = (song, index) => {
-    dispatch(resetAb());
-    dispatch(stopSound());
-    dispatch(playSound(song, index));
-  };
+  const handlePress = useCallback(
+    (song, index) => {
+      dispatch(resetAb());
+      dispatch(stopSound());
+      dispatch(playSound(song, index));
+    },
+    [dispatch],
+  );
 
-  const getItem = (data, index) => data[index];
-  const getItemCount = data => data.length;
+  const filteredSongs = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return songs.filter(
+      song =>
+        song?.title?.toLowerCase().includes(query) ||
+        song?.artist?.toLowerCase().includes(query),
+    );
+  }, [searchQuery, songs]);
+
+  const getItem = useCallback((data, index) => data[index], []);
+  const getItemCount = useCallback(data => data.length, []);
+
+  const renderItem = useCallback(
+    ({item, index}) => (
+      <SongItem
+        item={item}
+        onPress={() => handlePress(item, index)}
+        isPlaying={currentIndex === index && isPlaying}
+      />
+    ),
+    [handlePress, currentIndex, isPlaying],
+  );
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.listContainer
-        ]}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search songs or artists..."
+        placeholderTextColor="#999"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+      <View style={styles.listContainer}>
         <VirtualizedList
-          data={songs}
+          data={filteredSongs}
           initialNumToRender={10}
-          renderItem={({item, index}) => (
-            <SongItem
-              item={item}
-              onPress={() => handlePress(item, index)}
-              isPlaying={currentIndex === index && isPlaying}
-            />
-          )}
-          keyExtractor={(_, index) => index.toString()}
+          maxToRenderPerBatch={15}
+          windowSize={21}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => `${item.title}-${index}`}
           getItem={getItem}
           getItemCount={getItemCount}
           contentContainerStyle={{paddingBottom: 60}}
@@ -73,6 +96,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
     padding: 10,
     paddingTop: 30,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#333',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    color: '#fff',
   },
   listContainer: {
     flex: 9,
