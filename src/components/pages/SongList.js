@@ -38,22 +38,31 @@ const SongList = () => {
 
   return (
     <View style={styles.container}>
-      <VirtualizedList
-        data={songs}
-        initialNumToRender={10}
-        renderItem={({item, index}) => (
-          <SongItem
-            item={item}
-            onPress={() => handlePress(item, index)}
-            isPlaying={currentIndex === index && isPlaying}
-          />
-        )}
-        keyExtractor={(_, index) => index.toString()}
-        getItem={getItem}
-        getItemCount={getItemCount}
-        contentContainerStyle={{paddingBottom: 80}}
-      />
-      {(isPlaying || isPaused) && <MiniPlayer />}
+      <View
+        style={[
+          styles.listContainer
+        ]}>
+        <VirtualizedList
+          data={songs}
+          initialNumToRender={10}
+          renderItem={({item, index}) => (
+            <SongItem
+              item={item}
+              onPress={() => handlePress(item, index)}
+              isPlaying={currentIndex === index && isPlaying}
+            />
+          )}
+          keyExtractor={(_, index) => index.toString()}
+          getItem={getItem}
+          getItemCount={getItemCount}
+          contentContainerStyle={{paddingBottom: 60}}
+        />
+      </View>
+      {(isPlaying || isPaused) && (
+        <View style={styles.miniPlayerContainer}>
+          <MiniPlayer />
+        </View>
+      )}
     </View>
   );
 };
@@ -64,6 +73,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
     padding: 10,
     paddingTop: 30,
+  },
+  listContainer: {
+    flex: 9,
+  },
+  miniPlayerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

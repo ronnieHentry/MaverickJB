@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Animated
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -47,6 +48,7 @@ const Player = ({route}) => {
   const {index} = route.params;
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const fadeAnim = useRef(new Animated.Value(0)).current;
   const [isPitchModalVisible, setPitchModalVisible] = useState(false);
   const [isSpeedModalVisible, setSpeedModalVisible] = useState(false);
   const {eqOn, speedOn, pitchOn, abOn, shuffleOn, repeatOn} = useSelector(
@@ -133,6 +135,14 @@ const Player = ({route}) => {
   ];
 
   useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       dispatch(updatePlaybackPosition());
     }, 1000);
@@ -148,7 +158,7 @@ const Player = ({route}) => {
     setSpeedModalVisible(!isSpeedModalVisible);
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, {opacity: fadeAnim}]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate('SongList')}>
           <Icon name="chevron-back" size={24} color="#fff" />
@@ -222,7 +232,7 @@ const Player = ({route}) => {
       <View style={styles.buttons}>
         <PlayerControls buttons={buttons} />
       </View>
-    </View>
+    </Animated.View>
   );
 };
 

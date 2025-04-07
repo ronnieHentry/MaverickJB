@@ -60,13 +60,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopWidth: 1,
     borderTopColor: '#444',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderRadius: 15,
-    marginHorizontal: 10,
-    marginBottom: 13,
+    borderRadius: 0,
     shadowRadius: 4,
     zIndex: 1,
   },
@@ -83,7 +77,7 @@ const styles = StyleSheet.create({
   title: {
     color: '#e0e0e0',
     fontSize: 16,
-    fontWeight: '1300',
+    fontWeight: 'bold',
   },
   artist: {
     color: '#b3b3b3',

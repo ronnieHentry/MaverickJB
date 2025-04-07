@@ -12,7 +12,7 @@ const Stack = createSharedElementStackNavigator();
 const App = () => {
   return (
     <Provider store={store}>
-      <NavigationContainer>
+      <NavigationContainer theme={{ colors: { background: '#000' } }}>
         <PermissionWrapper>
           <Stack.Navigator screenOptions={{headerShown: false}}>
             <Stack.Screen name="SongList" component={SongList} />
