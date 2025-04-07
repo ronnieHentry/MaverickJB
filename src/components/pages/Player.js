@@ -72,7 +72,7 @@ const Player = ({route}) => {
   );
 
   const toggleButtons = [
-    {label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq())},
+    // {label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq())},
     {
       label: 'Speed',
       isActive: speed !== 1,
@@ -299,13 +299,13 @@ const styles = StyleSheet.create({
   time: {
     color: '#d3d3d3',
     fontSize: 14,
-    width: 50, // Fixed width for time labels
+    width: 50,
     textAlign: 'center',
   },
   slider: {
     flex: 1,
     height: 40,
-    marginHorizontal: 10, // Add margin to prevent overlap
+    marginHorizontal: 10,
   },
   buttons: {
     flexDirection: 'row',

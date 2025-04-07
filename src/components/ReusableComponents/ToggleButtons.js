@@ -20,7 +20,7 @@ const ToggleButtons = ({ buttons }) => (
 const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     width: '100%',
     marginBottom: 20,
   },
