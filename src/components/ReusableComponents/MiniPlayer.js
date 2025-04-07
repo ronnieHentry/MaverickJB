@@ -3,7 +3,6 @@ import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useDispatch, useSelector} from 'react-redux';
 import {playNextSound, togglePlayPause} from '../../store/slices/playerSlice';
-import {useNavigation} from '@react-navigation/native';
 import {SharedElement} from 'react-navigation-shared-element';
 
 const MiniPlayer = ({onPress}) => {
@@ -17,7 +16,7 @@ const MiniPlayer = ({onPress}) => {
 
   return (
     <TouchableOpacity
-      onPress={onPress} // Trigger the callback to open the Player
+      onPress={onPress}
       activeOpacity={0.8}
       style={styles.container}>
       <SharedElement id={`song-${index}`}>

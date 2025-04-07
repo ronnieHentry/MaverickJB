@@ -24,7 +24,7 @@ export const fetchMp3Files = async () => {
 
 export const fetchMusicFilesMetadata = async () => {
   const musicFiles = await getAll({
-    limit: 200,
+    limit: 9999,
     offset: 0,
     coverQuality: 50,
     minSongDuration: 1000,

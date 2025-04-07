@@ -34,7 +34,6 @@ const SongList = () => {
       dispatch(resetAb());
       dispatch(stopSound());
       dispatch(playSound(song, index));
-      setPlayerVisible(true); // Show the Player
     },
     [dispatch],
   );
@@ -73,7 +72,7 @@ const SongList = () => {
       />
       <View style={styles.listContainer}>
         <VirtualizedList
-          data={filteredSongs}
+          data={songs}
           initialNumToRender={10}
           maxToRenderPerBatch={15}
           windowSize={21}
@@ -101,9 +100,9 @@ const SongList = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: 'rgba(0, 0, 0, 0.96)',
     padding: 10,
-    paddingTop: 30,
+    paddingTop: 10,
   },
   searchInput: {
     height: 40,
