@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Animated
+  Animated,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -40,7 +40,8 @@ import {
   POSITIVE_PITCH_INCREMENTS,
   POSITIVE_SPEED_INCREMENTS,
 } from '../utils/constants';
-import { SharedElement } from 'react-navigation-shared-element';
+import {SharedElement} from 'react-navigation-shared-element';
+import useSwipeDownToGoBack from '../utils/useSwipeDownToGoBack';
 
 const {width} = Dimensions.get('window'); // Get screen width for responsive design
 
@@ -65,6 +66,10 @@ const Player = ({route}) => {
     pitch,
     speed,
   } = useSelector(state => state.playerSlice);
+
+  const {pan, panResponder, fadeOthers} = useSwipeDownToGoBack(() =>
+    navigation.navigate('SongList'),
+  );
 
   const toggleButtons = [
     {label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq())},
@@ -158,80 +163,86 @@ const Player = ({route}) => {
     setSpeedModalVisible(!isSpeedModalVisible);
 
   return (
-    <Animated.View style={[styles.container, {opacity: fadeAnim}]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('SongList')}>
-          <Icon name="chevron-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.nowPlaying}>Now Playing</Text>
-        <TouchableOpacity>
-          <Icon name="settings-outline" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
+    <Animated.View
+      style={[styles.container, {transform: pan.getTranslateTransform()}]}
+      {...panResponder.panHandlers}>
+      <Animated.View style={{ opacity: fadeOthers, width: '100%' }}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.navigate('SongList')}>
+            <Icon name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.nowPlaying}>Now Playing</Text>
+          <TouchableOpacity>
+            <Icon name="settings-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
       <SharedElement id={`song-${index}`}>
         <Image source={getImageSource(image)} style={styles.image} />
       </SharedElement>
-      <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-        {title}
-      </Text>
-      <Text style={styles.artist} numberOfLines={1} ellipsizeMode="tail">
-        {artist}
-      </Text>
+      <Animated.View style={{ opacity: fadeOthers, width: '100%' }}>
+        <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+          {title}
+        </Text>
+        <Text style={styles.artist} numberOfLines={1} ellipsizeMode="tail">
+          {artist}
+        </Text>
 
-      <ToggleButtons buttons={toggleButtons} />
+        <ToggleButtons buttons={toggleButtons} />
 
-      <ControlModal
-        visible={isPitchModalVisible}
-        onClose={() => setPitchModalVisible(false)}
-        onChangeValue={(val, reset) => {
-          dispatch(adjustPitch(val, reset));
-        }}
-        label="Pitch"
-        min={-12}
-        max={12}
-        step={1}
-        increments={{
-          negative: NEGATIVE_PITCH_INCREMENTS,
-          positive: POSITIVE_PITCH_INCREMENTS,
-        }}
-        value={pitch}
-      />
-
-      <ControlModal
-        visible={isSpeedModalVisible}
-        onClose={() => setSpeedModalVisible(false)}
-        onChangeValue={(val, reset) => {
-          dispatch(adjustSpeed(val, reset));
-        }}
-        label="Speed"
-        min={0.25}
-        max={5.0}
-        step={0.05}
-        increments={{
-          negative: NEGATIVE_SPEED_INCREMENTS,
-          positive: POSITIVE_SPEED_INCREMENTS,
-        }}
-        initialValue={1}
-        value={speed}
-      />
-
-      <View style={styles.sliderContainer}>
-        <Text style={styles.time}>{currentTime}</Text>
-        <Slider
-          style={styles.slider}
-          minimumValue={0}
-          maximumValue={1}
-          minimumTrackTintColor="#ff0000"
-          maximumTrackTintColor="#555"
-          thumbTintColor="#ff0000"
-          value={playbackPosition}
-          onSlidingComplete={value => dispatch(seekToPosition(value))}
+        <ControlModal
+          visible={isPitchModalVisible}
+          onClose={() => setPitchModalVisible(false)}
+          onChangeValue={(val, reset) => {
+            dispatch(adjustPitch(val, reset));
+          }}
+          label="Pitch"
+          min={-12}
+          max={12}
+          step={1}
+          increments={{
+            negative: NEGATIVE_PITCH_INCREMENTS,
+            positive: POSITIVE_PITCH_INCREMENTS,
+          }}
+          value={pitch}
         />
-        <Text style={styles.time}>{totalTime}</Text>
-      </View>
-      <View style={styles.buttons}>
-        <PlayerControls buttons={buttons} />
-      </View>
+
+        <ControlModal
+          visible={isSpeedModalVisible}
+          onClose={() => setSpeedModalVisible(false)}
+          onChangeValue={(val, reset) => {
+            dispatch(adjustSpeed(val, reset));
+          }}
+          label="Speed"
+          min={0.25}
+          max={5.0}
+          step={0.05}
+          increments={{
+            negative: NEGATIVE_SPEED_INCREMENTS,
+            positive: POSITIVE_SPEED_INCREMENTS,
+          }}
+          initialValue={1}
+          value={speed}
+        />
+
+        <View style={styles.sliderContainer}>
+          <Text style={styles.time}>{currentTime}</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={1}
+            minimumTrackTintColor="#ff0000"
+            maximumTrackTintColor="#555"
+            thumbTintColor="#ff0000"
+            value={playbackPosition}
+            onSlidingComplete={value => dispatch(seekToPosition(value))}
+          />
+          <Text style={styles.time}>{totalTime}</Text>
+        </View>
+        <View style={styles.buttons}>
+          <PlayerControls buttons={buttons} />
+        </View>
+      </Animated.View>
     </Animated.View>
   );
 };
