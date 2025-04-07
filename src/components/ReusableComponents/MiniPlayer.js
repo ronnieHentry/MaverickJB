@@ -6,9 +6,8 @@ import {playNextSound, togglePlayPause} from '../../store/slices/playerSlice';
 import {useNavigation} from '@react-navigation/native';
 import {SharedElement} from 'react-navigation-shared-element';
 
-const MiniPlayer = () => {
+const MiniPlayer = ({onPress}) => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
   const index = useSelector(state => state.songsSlice.currentIndex);
   const {title, artist, isPlaying, image} = useSelector(
     state => state.playerSlice,
@@ -18,9 +17,7 @@ const MiniPlayer = () => {
 
   return (
     <TouchableOpacity
-      onPress={() => {
-        navigation.navigate('Player', {index});
-      }}
+      onPress={onPress} // Trigger the callback to open the Player
       activeOpacity={0.8}
       style={styles.container}>
       <SharedElement id={`song-${index}`}>

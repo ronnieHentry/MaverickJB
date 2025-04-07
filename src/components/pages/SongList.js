@@ -7,12 +7,14 @@ import {resetAb} from '../../store/slices/controlsSlice';
 import SongItem from '../ReusableComponents/SongItem';
 import {useSelector, useDispatch} from 'react-redux';
 import MiniPlayer from '../ReusableComponents/MiniPlayer';
+import Player from './Player'; // Import the Player component
 
 const SongList = () => {
   const dispatch = useDispatch();
   const {songs, currentIndex} = useSelector(state => state.songsSlice);
   const {isPlaying, isPaused} = useSelector(state => state.playerSlice);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isPlayerVisible, setPlayerVisible] = useState(false); // State to control Player visibility
 
   useEffect(() => {
     const loadSongs = async () => {
@@ -32,6 +34,7 @@ const SongList = () => {
       dispatch(resetAb());
       dispatch(stopSound());
       dispatch(playSound(song, index));
+      setPlayerVisible(true); // Show the Player
     },
     [dispatch],
   );
@@ -83,7 +86,12 @@ const SongList = () => {
       </View>
       {(isPlaying || isPaused) && (
         <View style={styles.miniPlayerContainer}>
-          <MiniPlayer />
+          <MiniPlayer onPress={() => setPlayerVisible(true)} />
+        </View>
+      )}
+      {isPlayerVisible && (
+        <View style={styles.playerContainer}>
+          <Player onClose={() => setPlayerVisible(false)} />
         </View>
       )}
     </View>
@@ -113,6 +121,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  playerContainer: {
+    ...StyleSheet.absoluteFillObject, // Make the Player fill the screen
+    backgroundColor: '#000', // Optional: Add a background color
+    zIndex: 10, // Ensure it appears on top
   },
 });
 

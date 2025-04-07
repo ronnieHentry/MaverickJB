@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
+  BackHandler,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -45,8 +46,8 @@ import useSwipeDownToGoBack from '../utils/useSwipeDownToGoBack';
 
 const {width} = Dimensions.get('window'); // Get screen width for responsive design
 
-const Player = ({route}) => {
-  const {index} = route.params;
+const Player = ({onClose, route}) => {
+  const index = useSelector(state => state.songsSlice.currentIndex);
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -67,9 +68,7 @@ const Player = ({route}) => {
     speed,
   } = useSelector(state => state.playerSlice);
 
-  const {pan, panResponder, fadeOthers} = useSwipeDownToGoBack(() =>
-    navigation.navigate('SongList'),
-  );
+  const {pan, panResponder, fadeOthers} = useSwipeDownToGoBack(onClose);
 
   const toggleButtons = [
     // {label: 'EQ', isActive: eqOn, onPress: () => dispatch(toggleEq())},
@@ -145,7 +144,16 @@ const Player = ({route}) => {
       duration: 300,
       useNativeDriver: true,
     }).start();
-  }, []);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        onClose();
+        return true;
+      },
+    );
+
+    return () => backHandler.remove();
+  }, [onClose]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -166,9 +174,9 @@ const Player = ({route}) => {
     <Animated.View
       style={[styles.container, {transform: pan.getTranslateTransform()}]}
       {...panResponder.panHandlers}>
-      <Animated.View style={{ opacity: fadeOthers, width: '100%' }}>
+      <Animated.View style={{opacity: fadeOthers, width: '100%'}}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.navigate('SongList')}>
+          <TouchableOpacity onPress={onClose}>
             <Icon name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.nowPlaying}>Now Playing</Text>
@@ -180,7 +188,7 @@ const Player = ({route}) => {
       <SharedElement id={`song-${index}`}>
         <Image source={getImageSource(image)} style={styles.image} />
       </SharedElement>
-      <Animated.View style={{ opacity: fadeOthers, width: '100%' }}>
+      <Animated.View style={{opacity: fadeOthers, width: '100%'}}>
         <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
           {title}
         </Text>

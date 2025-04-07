@@ -1,7 +1,7 @@
-import { useRef } from 'react';
-import { Animated, PanResponder } from 'react-native';
+import {useRef} from 'react';
+import {Animated, PanResponder} from 'react-native';
 
-const useSwipeDownToGoBack = (onSwipeDown, threshold = 100) => {
+const useSwipeDownToGoBack = (onClose, threshold = 100) => {
   const pan = useRef(new Animated.ValueXY()).current;
   const fadeOthers = useRef(new Animated.Value(1)).current;
 
@@ -12,7 +12,7 @@ const useSwipeDownToGoBack = (onSwipeDown, threshold = 100) => {
 
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dy > 0) {
-          pan.setValue({ x: 0, y: gestureState.dy });
+          pan.setValue({x: 0, y: gestureState.dy});
           const fade = 1 - gestureState.dy / threshold;
           fadeOthers.setValue(fade < 0 ? 0 : fade);
         }
@@ -32,14 +32,14 @@ const useSwipeDownToGoBack = (onSwipeDown, threshold = 100) => {
               useNativeDriver: true,
             }),
           ]).start(() => {
-            onSwipeDown();
-            pan.setValue({ x: 0, y: 0 });
+            onClose();
+            pan.setValue({x: 0, y: 0});
             fadeOthers.setValue(1); // reset for when we come back
           });
         } else {
           Animated.parallel([
             Animated.spring(pan, {
-              toValue: { x: 0, y: 0 },
+              toValue: {x: 0, y: 0},
               useNativeDriver: true,
             }),
             Animated.timing(fadeOthers, {
@@ -50,10 +50,10 @@ const useSwipeDownToGoBack = (onSwipeDown, threshold = 100) => {
           ]).start();
         }
       },
-    })
+    }),
   ).current;
 
-  return { pan, panResponder, fadeOthers };
+  return {pan, panResponder, fadeOthers};
 };
 
 export default useSwipeDownToGoBack;
