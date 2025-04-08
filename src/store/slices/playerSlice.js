@@ -6,6 +6,7 @@ import {
   setCurrentIndex,
 } from '../slices/songsSlice';
 import {clamp, getPitchMultiplier} from '../../components/utils/helper';
+import {resetAb} from './controlsSlice';
 
 let soundInstance = null;
 
@@ -21,6 +22,11 @@ const playerSlice = createSlice({
     artist: null,
     album: null,
     image: null,
+    abRepeat: {
+      pointA: null,
+      pointB: null,
+      isActive: false,
+    },
     pitch: 0,
     speed: 1,
   },
@@ -57,6 +63,17 @@ const playerSlice = createSlice({
     setDuration: (state, action) => {
       state.duration = action.payload;
     },
+    setPointA: (state, action) => {
+      state.abRepeat.pointA = action.payload;
+      state.abRepeat.isActive = false;
+    },
+    setPointB: (state, action) => {
+      state.abRepeat.pointB = action.payload;
+      state.abRepeat.isActive = true;
+    },
+    clearAbRepeat: state => {
+      state.abRepeat = {pointA: null, pointB: null, isActive: false};
+    },
     setPitch: (state, action) => {
       state.pitch = action.payload;
     },
@@ -73,6 +90,9 @@ export const {
   setPlaying,
   setPlaybackPosition,
   setDuration,
+  setPointA,
+  setPointB,
+  clearAbRepeat,
   setPitch,
   setSpeed,
 } = playerSlice.actions;
@@ -80,6 +100,8 @@ export const {
 export const playSound = (song, index) => (dispatch, getState) => {
   if (soundInstance) {
     soundInstance.stop().release();
+    dispatch(resetAb());
+    dispatch(clearAbRepeat());
   }
   const {path, title, artist, album, image} = song;
   soundInstance = new Sound(path, Sound.MAIN_BUNDLE, error => {
@@ -93,7 +115,7 @@ export const playSound = (song, index) => (dispatch, getState) => {
     dispatch(setDuration(duration));
 
     soundInstance.play(() => {
-        dispatch(playNextSound());
+      dispatch(playNextSound());
     });
   });
   dispatch(setCurrentSound({path, title, artist, album, image}));
@@ -101,6 +123,8 @@ export const playSound = (song, index) => (dispatch, getState) => {
 };
 
 export const playNextSound = () => (dispatch, getState) => {
+  dispatch(resetAb());
+  dispatch(clearAbRepeat());
   dispatch(incrementIndex());
   const updatedState = getState(); // Get updated state after dispatch
   const nextSong = selectCurrentSong(updatedState);
@@ -117,11 +141,15 @@ export const stopSound = () => dispatch => {
     soundInstance = null;
   }
   dispatch(clearCurrentSound());
+  dispatch(resetAb());
+  dispatch(clearAbRepeat());
 };
 
 // Thunk to rewind the sound by 3 seconds
 export const playBack = () => dispatch => {
   if (soundInstance) {
+    dispatch(resetAb());
+    dispatch(clearAbRepeat());
     soundInstance.getCurrentTime(seconds => {
       const newPosition = Math.max(seconds - 3, 0);
       soundInstance.setCurrentTime(newPosition);
@@ -131,6 +159,8 @@ export const playBack = () => dispatch => {
 
 export const playForward = () => dispatch => {
   if (soundInstance) {
+    dispatch(resetAb());
+    dispatch(clearAbRepeat());
     soundInstance.getCurrentTime(seconds => {
       const duration = soundInstance.getDuration();
       const newPosition = Math.min(seconds + 10, duration);
@@ -141,7 +171,6 @@ export const playForward = () => dispatch => {
 
 export const togglePlayPause = () => (dispatch, getState) => {
   const {isPlaying, isPaused} = getState().playerSlice;
-
   if (soundInstance) {
     if (isPlaying && !isPaused) {
       soundInstance.pause();
@@ -221,9 +250,9 @@ export const adjustSpeed =
     dispatch(setSpeed(newSpeed));
 
     if (soundInstance) {
-      // Apply the new speed multiplier to the sound instance
       soundInstance.setSpeed(newSpeed);
     }
-};
+  };
+export {soundInstance};
 
 export default playerSlice.reducer;

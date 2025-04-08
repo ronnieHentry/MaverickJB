@@ -43,6 +43,7 @@ import {
 } from '../utils/constants';
 import {SharedElement} from 'react-navigation-shared-element';
 import useSwipeDownToGoBack from '../utils/useSwipeDownToGoBack';
+import {toggleAbRepeat} from '../../store/slices/abRepeatControls';
 
 const {width} = Dimensions.get('window'); // Get screen width for responsive design
 
@@ -53,7 +54,7 @@ const Player = ({onClose, route}) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [isPitchModalVisible, setPitchModalVisible] = useState(false);
   const [isSpeedModalVisible, setSpeedModalVisible] = useState(false);
-  const {eqOn, speedOn, pitchOn, abOn, shuffleOn, repeatOn} = useSelector(
+  const {eqOn, speedOn, pitchOn, abState, shuffleOn, repeatOn} = useSelector(
     state => state.controlsSlice,
   );
   const {
@@ -88,7 +89,15 @@ const Player = ({onClose, route}) => {
         handleTogglePitchModal();
       },
     },
-    {label: 'A-B', isActive: abOn, onPress: () => dispatch(toggleAb())},
+    {
+      label: `A-B`,
+      isActive: abState !== 'off',
+      onPress: () => {
+        dispatch(toggleAb());
+        dispatch(toggleAbRepeat());
+      },
+      abState,
+    },
   ];
 
   const buttons = [

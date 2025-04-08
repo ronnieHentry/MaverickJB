@@ -1,17 +1,23 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 
-const ToggleButtons = ({ buttons }) => (
+const ToggleButtons = ({buttons}) => (
   <View style={styles.buttonRow}>
-    {buttons.map(({ label, isActive, onPress }) => (
-      <TouchableOpacity
-        key={label}
-        style={styles.button}
-        onPress={onPress}
-      >
+    {buttons.map(({label, isActive, onPress, abState}) => (
+      <TouchableOpacity key={label} style={styles.button} onPress={onPress}>
         <Text style={styles.buttonText}>{isActive ? 'ON' : 'OFF'}</Text>
         <View style={[styles.bar, isActive && styles.barOn]} />
-        <Text style={styles.buttonLabel}>{label}</Text>
+        {label === 'A-B' ? (
+          <Text
+            style={[
+              styles.buttonLabel,
+              (abState === 'a' || abState === 'b') && styles.abTextActive,
+            ]}>
+            {abState === 'a' ? 'A' : 'A-B'}
+          </Text>
+        ) : (
+          <Text style={styles.buttonLabel}>{label}</Text>
+        )}
       </TouchableOpacity>
     ))}
   </View>
@@ -50,7 +56,9 @@ const styles = StyleSheet.create({
   barOn: {
     backgroundColor: '#ff0000',
   },
+  abTextActive: {
+    color: '#ff0000',
+  },
 });
 
 export default ToggleButtons;
-
