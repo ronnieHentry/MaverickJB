@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   BackHandler,
-  Animated
+  Animated,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -171,87 +171,89 @@ const Player = ({onClose, route}) => {
     setSpeedModalVisible(!isSpeedModalVisible);
 
   return (
-      <Animated.View
-        style={[styles.container, {transform: pan.getTranslateTransform()}]}
-        {...panResponder.panHandlers}>
-        <Animated.View style={{opacity: fadeOthers, width: '100%'}}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose}>
-              <Icon name="chevron-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.nowPlaying}>Now Playing</Text>
-            <TouchableOpacity>
-              <Icon name="settings-outline" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-        <SharedElement id={`song-${index}`}>
-          <Image source={getImageSource(image)} style={styles.image} />
-        </SharedElement>
-        <Animated.View style={{opacity: fadeOthers, width: '100%'}}>
+    <Animated.View
+      style={[styles.container, {transform: pan.getTranslateTransform()}]}
+      {...panResponder.panHandlers}>
+      <Animated.View style={{opacity: fadeOthers, width: '100%'}}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onClose}>
+            <Icon name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.nowPlaying}>Now Playing</Text>
+          <TouchableOpacity>
+            <Icon name="settings-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+      <SharedElement id={`song-${index}`}>
+        <Image source={getImageSource(image)} style={styles.image} />
+      </SharedElement>
+      <Animated.View style={{opacity: fadeOthers, width: '100%'}}>
+        <View style={styles.metaContainer}>
           <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
             {title}
           </Text>
           <Text style={styles.artist} numberOfLines={1} ellipsizeMode="tail">
             {artist}
           </Text>
+        </View>
 
-          <ToggleButtons buttons={toggleButtons} />
+        <ToggleButtons buttons={toggleButtons} />
 
-          <ControlModal
-            visible={isPitchModalVisible}
-            onClose={() => setPitchModalVisible(false)}
-            onChangeValue={(val, reset) => {
-              dispatch(adjustPitch(val, reset));
-            }}
-            label="Pitch"
-            min={-12}
-            max={12}
-            step={1}
-            increments={{
-              negative: NEGATIVE_PITCH_INCREMENTS,
-              positive: POSITIVE_PITCH_INCREMENTS,
-            }}
-            value={pitch}
+        <ControlModal
+          visible={isPitchModalVisible}
+          onClose={() => setPitchModalVisible(false)}
+          onChangeValue={(val, reset) => {
+            dispatch(adjustPitch(val, reset));
+          }}
+          label="Pitch"
+          min={-12}
+          max={12}
+          step={1}
+          increments={{
+            negative: NEGATIVE_PITCH_INCREMENTS,
+            positive: POSITIVE_PITCH_INCREMENTS,
+          }}
+          value={pitch}
+        />
+
+        <ControlModal
+          visible={isSpeedModalVisible}
+          onClose={() => setSpeedModalVisible(false)}
+          onChangeValue={(val, reset) => {
+            dispatch(adjustSpeed(val, reset));
+          }}
+          label="Speed"
+          min={0.25}
+          max={5.0}
+          step={0.05}
+          increments={{
+            negative: NEGATIVE_SPEED_INCREMENTS,
+            positive: POSITIVE_SPEED_INCREMENTS,
+          }}
+          initialValue={1}
+          value={speed}
+        />
+
+        <View style={styles.sliderContainer}>
+          <Text style={styles.time}>{currentTime}</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={1}
+            minimumTrackTintColor="#ff0000"
+            maximumTrackTintColor="#555"
+            thumbTintColor="#ff0000"
+            value={playbackPosition}
+            onSlidingComplete={value => dispatch(seekToPosition(value))}
           />
-
-          <ControlModal
-            visible={isSpeedModalVisible}
-            onClose={() => setSpeedModalVisible(false)}
-            onChangeValue={(val, reset) => {
-              dispatch(adjustSpeed(val, reset));
-            }}
-            label="Speed"
-            min={0.25}
-            max={5.0}
-            step={0.05}
-            increments={{
-              negative: NEGATIVE_SPEED_INCREMENTS,
-              positive: POSITIVE_SPEED_INCREMENTS,
-            }}
-            initialValue={1}
-            value={speed}
-          />
-
-          <View style={styles.sliderContainer}>
-            <Text style={styles.time}>{currentTime}</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={1}
-              minimumTrackTintColor="#ff0000"
-              maximumTrackTintColor="#555"
-              thumbTintColor="#ff0000"
-              value={playbackPosition}
-              onSlidingComplete={value => dispatch(seekToPosition(value))}
-            />
-            <Text style={styles.time}>{totalTime}</Text>
-          </View>
-          <View style={styles.buttons}>
-            <PlayerControls buttons={buttons} />
-          </View>
-        </Animated.View>
+          <Text style={styles.time}>{totalTime}</Text>
+        </View>
+        <View style={styles.buttons}>
+          <PlayerControls buttons={buttons} />
+        </View>
       </Animated.View>
+    </Animated.View>
   );
 };
 
@@ -280,22 +282,25 @@ const styles = StyleSheet.create({
     width: width * 0.8,
     height: width * 0.8,
     borderRadius: 15,
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  metaContainer: {
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 30,
   },
   title: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 10,
-    width: '90%',
   },
   artist: {
     color: '#d3d3d3',
-    fontSize: 18,
+    fontSize: 16,
     textAlign: 'center',
-    marginBottom: 30,
-    width: '90%', // Fixed width to prevent overflow
+    marginTop: 4,
   },
   sliderContainer: {
     flexDirection: 'row',
