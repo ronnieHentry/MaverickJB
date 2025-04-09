@@ -1,12 +1,17 @@
 import {createSlice} from '@reduxjs/toolkit';
+
 import {
-  createSoundInstance,
-  getSoundInstance,
-  releaseSoundInstance,
-} from '../../components/utils/soundInstance';
-import {incrementIndex, selectCurrentSong, setCurrentIndex} from './songsSlice';
-import {clamp, getPitchMultiplier} from '../../components/utils/helper';
-import { resetAbRepeat } from './abRepeatControls';
+  handlePlaySound,
+  handlePlayNext,
+  handleStopSound,
+  handlePlayBack,
+  handlePlayForward,
+  handleTogglePlayPause,
+  handleSeekToPosition,
+  handleUpdatePlaybackPosition,
+  handleAdjustPitch,
+  handleAdjustSpeed,
+} from '../../components/utils/playerSliceUtils';
 
 const playerSlice = createSlice({
   name: 'player',
@@ -95,132 +100,39 @@ export const {
   setSpeed,
 } = playerSlice.actions;
 
-export const playSound = (song, index) => (dispatch, getState) => {
-  resetAbRepeat(dispatch);
-  releaseSoundInstance();
+export const playSound = (song, index) => (dispatch, getState) =>
+  handlePlaySound(dispatch, getState, song, index);
 
-  const {path, title, artist, album, image} = song;
+export const playNextSound = () => (dispatch, getState) =>
+  handlePlayNext(dispatch, getState);
 
-  createSoundInstance(path, sound => {
-    const {pitch} = getState().playerSlice;
-    sound.setPitch(Math.pow(2, pitch / 12));
-    const duration = sound.getDuration();
-    dispatch(setDuration(duration));
-    sound.play(() => dispatch(playNextSound()));
-  });
+export const stopSound = () => dispatch => handleStopSound(dispatch);
 
-  dispatch(setCurrentSound({path, title, artist, album, image}));
-  dispatch(setCurrentIndex(index));
-};
-
-export const playNextSound = () => (dispatch, getState) => {
-  resetAbRepeat(dispatch);
-  dispatch(incrementIndex());
-
-  const updatedState = getState();
-  const nextSong = selectCurrentSong(updatedState);
-
-  if (nextSong) {
-    dispatch(playSound(nextSong, updatedState.songsSlice.currentIndex));
-  } else {
-    dispatch(clearCurrentSound());
-  }
-};
-
-export const stopSound = () => dispatch => {
-  releaseSoundInstance();
-  dispatch(clearCurrentSound());
-  resetAbRepeat(dispatch);
+export const playForward = () => dispatch => {
+  handlePlayForward(dispatch);
 };
 
 export const playBack = () => dispatch => {
-  resetAbRepeat(dispatch);
-  const sound = getSoundInstance();
-  if (sound) {
-    sound.getCurrentTime(seconds => {
-      const newPosition = Math.max(seconds - 3, 0);
-      sound.setCurrentTime(newPosition);
-    });
-  }
+  handlePlayBack(dispatch);
 };
 
-export const playForward = () => dispatch => {
-  resetAbRepeat(dispatch);
-  const sound = getSoundInstance();
-  if (sound) {
-    sound.getCurrentTime(seconds => {
-      const duration = sound.getDuration();
-      const newPosition = Math.min(seconds + 10, duration);
-      sound.setCurrentTime(newPosition);
-    });
-  }
-};
+export const togglePlayPause = () => (dispatch, getState) =>
+  handleTogglePlayPause(dispatch, getState);
 
-export const togglePlayPause = () => (dispatch, getState) => {
-  const {isPlaying, isPaused} = getState().playerSlice;
-  const sound = getSoundInstance();
+export const seekToPosition = normalizedPosition => dispatch =>
+  handleSeekToPosition(dispatch, normalizedPosition);
 
-  if (sound) {
-    if (isPlaying && !isPaused) {
-      sound.pause();
-      dispatch(setPaused(true));
-      dispatch(setPlaying(false));
-    } else if (isPaused) {
-      sound.play(() => dispatch(clearCurrentSound()));
-      dispatch(setPaused(false));
-      dispatch(setPlaying(true));
-    }
-  }
-};
-
-export const seekToPosition = normalizedPosition => dispatch => {
-  const sound = getSoundInstance();
-  if (sound) {
-    const duration = sound.getDuration();
-    const targetPosition = normalizedPosition * duration;
-    sound.setCurrentTime(targetPosition);
-    dispatch(setPlaybackPosition(normalizedPosition));
-  }
-};
-
-export const updatePlaybackPosition = () => dispatch => {
-  const sound = getSoundInstance();
-  if (sound) {
-    sound.getCurrentTime(seconds => {
-      const duration = sound.getDuration();
-      const normalizedPosition = seconds / duration;
-      dispatch(setPlaybackPosition(normalizedPosition));
-    });
-  }
-};
+export const updatePlaybackPosition = () => dispatch =>
+  handleUpdatePlaybackPosition(dispatch);
 
 export const adjustPitch =
   (pitchChange = 0, reset = false) =>
-  (dispatch, getState) => {
-    let newPitch = reset
-      ? 0
-      : clamp(getState().playerSlice.pitch + pitchChange, -12, 12);
-    dispatch(setPitch(newPitch));
-
-    const sound = getSoundInstance();
-    if (sound) {
-      const pitchMultiplier = getPitchMultiplier(newPitch);
-      sound.setPitch(pitchMultiplier);
-    }
-  };
+  (dispatch, getState) =>
+    handleAdjustPitch(dispatch, getState, pitchChange, reset);
 
 export const adjustSpeed =
   (speedChange = 0, reset = false) =>
-  (dispatch, getState) => {
-    let newSpeed = reset
-      ? 1
-      : clamp(getState().playerSlice.speed + speedChange, 0.25, 5.0);
-    dispatch(setSpeed(newSpeed));
-
-    const sound = getSoundInstance();
-    if (sound) {
-      sound.setSpeed(newSpeed);
-    }
-  };
+  (dispatch, getState) =>
+    handleAdjustSpeed(dispatch, getState, speedChange, reset);
 
 export default playerSlice.reducer;
