@@ -59,6 +59,35 @@ export const handlePlayNext = (dispatch, getState) => {
   }
 };
 
+export const handlePlayPrevious = (dispatch, getState) => {
+  resetAbRepeat(dispatch);
+
+  const state = getState();
+  const sound = getSoundInstance();
+
+  if (sound) {
+    sound.getCurrentTime(seconds => {
+      if (seconds > 3) {
+        sound.setCurrentTime(0); // Just restart current song
+      } else {
+        const currentIndex = state.songsSlice.currentIndex;
+
+        if (currentIndex > 0) {
+          const newIndex = currentIndex - 1;
+          const songList = state.songsSlice.songs;
+          const prevSong = songList[newIndex];
+
+          if (prevSong) {
+            handlePlaySound(dispatch, getState, prevSong, newIndex);
+          }
+        } else {
+          sound.setCurrentTime(0); // If it's the first song, restart
+        }
+      }
+    });
+  }
+};
+
 export const handleStopSound = dispatch => {
   releaseSoundInstance();
   dispatch(clearCurrentSound());

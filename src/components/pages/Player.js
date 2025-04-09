@@ -29,6 +29,7 @@ import {
   playBack,
   playForward,
   playNextSound,
+  playPreviousSound,
   seekToPosition,
   togglePlayPause,
   updatePlaybackPosition,
@@ -110,7 +111,7 @@ const Player = ({onClose, route}) => {
     {
       name: 'play-skip-back-outline',
       size: 48,
-      onPress: () => console.log('Skip Back'),
+      onPress: () => dispatch(playPreviousSound()),
       iconColor: '#fff',
     },
     {

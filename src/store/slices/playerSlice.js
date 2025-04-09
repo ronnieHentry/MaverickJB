@@ -11,6 +11,7 @@ import {
   handleUpdatePlaybackPosition,
   handleAdjustPitch,
   handleAdjustSpeed,
+  handlePlayPrevious,
 } from '../../components/utils/playerSliceUtils';
 
 const playerSlice = createSlice({
@@ -105,6 +106,9 @@ export const playSound = (song, index) => (dispatch, getState) =>
 
 export const playNextSound = () => (dispatch, getState) =>
   handlePlayNext(dispatch, getState);
+
+export const playPreviousSound = () => (dispatch, getState) =>
+  handlePlayPrevious(dispatch, getState);
 
 export const stopSound = () => dispatch => handleStopSound(dispatch);
 
