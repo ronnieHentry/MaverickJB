@@ -34,7 +34,6 @@ const controlsSlice = createSlice({
     },
     resetAb: state => {
       state.abState = 'off';
-      stopAbLoop();
     },
     toggleShuffle: state => {
       state.shuffleOn = !state.shuffleOn;

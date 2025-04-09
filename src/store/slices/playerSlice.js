@@ -1,14 +1,12 @@
 import {createSlice} from '@reduxjs/toolkit';
-import Sound from 'react-native-sound';
 import {
-  incrementIndex,
-  selectCurrentSong,
-  setCurrentIndex,
-} from '../slices/songsSlice';
+  createSoundInstance,
+  getSoundInstance,
+  releaseSoundInstance,
+} from '../../components/utils/soundInstance';
+import {incrementIndex, selectCurrentSong, setCurrentIndex} from './songsSlice';
 import {clamp, getPitchMultiplier} from '../../components/utils/helper';
-import {resetAb} from './controlsSlice';
-
-let soundInstance = null;
+import { resetAbRepeat } from './abRepeatControls';
 
 const playerSlice = createSlice({
   name: 'player',
@@ -98,36 +96,30 @@ export const {
 } = playerSlice.actions;
 
 export const playSound = (song, index) => (dispatch, getState) => {
-  if (soundInstance) {
-    soundInstance.stop().release();
-    dispatch(resetAb());
-    dispatch(clearAbRepeat());
-  }
-  const {path, title, artist, album, image} = song;
-  soundInstance = new Sound(path, Sound.MAIN_BUNDLE, error => {
-    if (error) {
-      console.error('Failed to load sound', error);
-      return;
-    }
-    const {pitch} = getState().playerSlice;
-    soundInstance.setPitch(Math.pow(2, pitch / 12));
-    const duration = soundInstance.getDuration();
-    dispatch(setDuration(duration));
+  resetAbRepeat(dispatch);
+  releaseSoundInstance();
 
-    soundInstance.play(() => {
-      dispatch(playNextSound());
-    });
+  const {path, title, artist, album, image} = song;
+
+  createSoundInstance(path, sound => {
+    const {pitch} = getState().playerSlice;
+    sound.setPitch(Math.pow(2, pitch / 12));
+    const duration = sound.getDuration();
+    dispatch(setDuration(duration));
+    sound.play(() => dispatch(playNextSound()));
   });
+
   dispatch(setCurrentSound({path, title, artist, album, image}));
   dispatch(setCurrentIndex(index));
 };
 
 export const playNextSound = () => (dispatch, getState) => {
-  dispatch(resetAb());
-  dispatch(clearAbRepeat());
+  resetAbRepeat(dispatch);
   dispatch(incrementIndex());
-  const updatedState = getState(); // Get updated state after dispatch
+
+  const updatedState = getState();
   const nextSong = selectCurrentSong(updatedState);
+
   if (nextSong) {
     dispatch(playSound(nextSong, updatedState.songsSlice.currentIndex));
   } else {
@@ -136,50 +128,45 @@ export const playNextSound = () => (dispatch, getState) => {
 };
 
 export const stopSound = () => dispatch => {
-  if (soundInstance) {
-    soundInstance.stop().release();
-    soundInstance = null;
-  }
+  releaseSoundInstance();
   dispatch(clearCurrentSound());
-  dispatch(resetAb());
-  dispatch(clearAbRepeat());
+  resetAbRepeat(dispatch);
 };
 
-// Thunk to rewind the sound by 3 seconds
 export const playBack = () => dispatch => {
-  if (soundInstance) {
-    dispatch(resetAb());
-    dispatch(clearAbRepeat());
-    soundInstance.getCurrentTime(seconds => {
+  resetAbRepeat(dispatch);
+  const sound = getSoundInstance();
+  if (sound) {
+    sound.getCurrentTime(seconds => {
       const newPosition = Math.max(seconds - 3, 0);
-      soundInstance.setCurrentTime(newPosition);
+      sound.setCurrentTime(newPosition);
     });
   }
 };
 
 export const playForward = () => dispatch => {
-  if (soundInstance) {
-    dispatch(resetAb());
-    dispatch(clearAbRepeat());
-    soundInstance.getCurrentTime(seconds => {
-      const duration = soundInstance.getDuration();
+  resetAbRepeat(dispatch);
+  const sound = getSoundInstance();
+  if (sound) {
+    sound.getCurrentTime(seconds => {
+      const duration = sound.getDuration();
       const newPosition = Math.min(seconds + 10, duration);
-      soundInstance.setCurrentTime(newPosition);
+      sound.setCurrentTime(newPosition);
     });
   }
 };
 
 export const togglePlayPause = () => (dispatch, getState) => {
   const {isPlaying, isPaused} = getState().playerSlice;
-  if (soundInstance) {
+  const sound = getSoundInstance();
+
+  if (sound) {
     if (isPlaying && !isPaused) {
-      soundInstance.pause();
+      sound.pause();
       dispatch(setPaused(true));
       dispatch(setPlaying(false));
     } else if (isPaused) {
-      soundInstance.play(() => {
-        dispatch(clearCurrentSound());
-      });
+      sound.play(() => dispatch(clearCurrentSound()));
       dispatch(setPaused(false));
       dispatch(setPlaying(true));
     }
@@ -187,19 +174,20 @@ export const togglePlayPause = () => (dispatch, getState) => {
 };
 
 export const seekToPosition = normalizedPosition => dispatch => {
-  if (soundInstance) {
-    const duration = soundInstance.getDuration();
+  const sound = getSoundInstance();
+  if (sound) {
+    const duration = sound.getDuration();
     const targetPosition = normalizedPosition * duration;
-
-    soundInstance.setCurrentTime(targetPosition);
+    sound.setCurrentTime(targetPosition);
     dispatch(setPlaybackPosition(normalizedPosition));
   }
 };
 
 export const updatePlaybackPosition = () => dispatch => {
-  if (soundInstance) {
-    soundInstance.getCurrentTime(seconds => {
-      const duration = soundInstance.getDuration();
+  const sound = getSoundInstance();
+  if (sound) {
+    sound.getCurrentTime(seconds => {
+      const duration = sound.getDuration();
       const normalizedPosition = seconds / duration;
       dispatch(setPlaybackPosition(normalizedPosition));
     });
@@ -209,50 +197,30 @@ export const updatePlaybackPosition = () => dispatch => {
 export const adjustPitch =
   (pitchChange = 0, reset = false) =>
   (dispatch, getState) => {
-    let newPitch = 1;
-
-    if (reset) {
-      newPitch = 0; // Reset pitch in semitones to zero
-    } else {
-      const {pitch} = getState().playerSlice;
-      newPitch = pitch + pitchChange;
-
-      // Clamp newPitch between -12 and 12 to limit to one octave up/down
-      newPitch = clamp(newPitch, -12, 12);
-    }
-
-    // Dispatch the clamped pitch value in semitones to Redux state
+    let newPitch = reset
+      ? 0
+      : clamp(getState().playerSlice.pitch + pitchChange, -12, 12);
     dispatch(setPitch(newPitch));
 
-    if (soundInstance) {
-      // Calculate the pitch multiplier based on semitone changes
+    const sound = getSoundInstance();
+    if (sound) {
       const pitchMultiplier = getPitchMultiplier(newPitch);
-      soundInstance.setPitch(pitchMultiplier);
+      sound.setPitch(pitchMultiplier);
     }
   };
 
 export const adjustSpeed =
   (speedChange = 0, reset = false) =>
   (dispatch, getState) => {
-    let newSpeed = 1;
-
-    if (reset) {
-      newSpeed = 1; // Reset speed to 1 (normal speed)
-    } else {
-      const {speed} = getState().playerSlice;
-      newSpeed = speed + speedChange;
-
-      // Clamp newSpeed between 0.25 and 5.0 to limit the speed range
-      newSpeed = clamp(newSpeed, 0.25, 5.0);
-    }
-
-    // Dispatch the clamped speed value to Redux state
+    let newSpeed = reset
+      ? 1
+      : clamp(getState().playerSlice.speed + speedChange, 0.25, 5.0);
     dispatch(setSpeed(newSpeed));
 
-    if (soundInstance) {
-      soundInstance.setSpeed(newSpeed);
+    const sound = getSoundInstance();
+    if (sound) {
+      sound.setSpeed(newSpeed);
     }
   };
-export {soundInstance};
 
 export default playerSlice.reducer;

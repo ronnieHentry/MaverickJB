@@ -1,39 +1,24 @@
-import {
-  setPointA,
-  setPointB,
-  clearAbRepeat,
-  soundInstance,
-} from './playerSlice';
+import {getSoundInstance} from '../../components/utils/soundInstance';
+import {resetAb} from './controlsSlice';
+import {setPointA, setPointB, clearAbRepeat} from './playerSlice';
 
 let loopInterval = null;
 
 export const toggleAbRepeat = () => (dispatch, getState) => {
   const {abRepeat} = getState().playerSlice;
-  console.log(abRepeat);
+  const sound = getSoundInstance();
+  if (!sound) return;
 
-  // Case 1: Set Point A
   if (!abRepeat.pointA) {
-    if (soundInstance) {
-      soundInstance.getCurrentTime(seconds => {
-        dispatch(setPointA(seconds));
-      });
-      // console.log('Set Point A:', abRepeat.pointA);
-    }
-  }
-
-  // Case 2: Set Point B
-  else if (!abRepeat.pointB) {
-    if (soundInstance) {
-      soundInstance.getCurrentTime(seconds => {
-        dispatch(setPointB(seconds));
-        startAbLoop(getState); // Start looping only now
-      });
-      // console.log('Set Point B:', abRepeat.pointB);
-    }
-  }
-
-  // Case 3: Reset
-  else {
+    sound.getCurrentTime(seconds => {
+      dispatch(setPointA(seconds));
+    });
+  } else if (!abRepeat.pointB) {
+    sound.getCurrentTime(seconds => {
+      dispatch(setPointB(seconds));
+      startAbLoop(getState);
+    });
+  } else {
     dispatch(clearAbRepeat());
     stopAbLoop();
   }
@@ -44,16 +29,17 @@ export const startAbLoop = getState => {
 
   loopInterval = setInterval(() => {
     const {abRepeat} = getState().playerSlice;
+    const sound = getSoundInstance();
 
     if (
       abRepeat.isActive &&
       abRepeat.pointA !== null &&
       abRepeat.pointB !== null &&
-      soundInstance
+      sound
     ) {
-      soundInstance.getCurrentTime(seconds => {
+      sound.getCurrentTime(seconds => {
         if (seconds >= abRepeat.pointB) {
-          soundInstance.setCurrentTime(abRepeat.pointA);
+          sound.setCurrentTime(abRepeat.pointA);
         }
       });
     }
@@ -65,4 +51,10 @@ export const stopAbLoop = () => {
     clearInterval(loopInterval);
     loopInterval = null;
   }
+};
+
+export const resetAbRepeat = dispatch => {
+  stopAbLoop();
+  dispatch(clearAbRepeat());
+  dispatch(resetAb());
 };
