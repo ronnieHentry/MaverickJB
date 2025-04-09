@@ -1,10 +1,11 @@
 import {createSlice} from '@reduxjs/toolkit';
+import {stopAbLoop} from './abRepeatControls';
 
 const initialState = {
   eqOn: false,
   speedOn: false,
   pitchOn: false,
-  abOn: false,
+  abState: 'off', // 'off' | 'a' | 'b'
   shuffleOn: false,
   repeatOn: false,
 };
@@ -23,10 +24,16 @@ const controlsSlice = createSlice({
       state.pitchOn = action.payload !== 0;
     },
     toggleAb: state => {
-      state.abOn = !state.abOn;
+      if (state.abState === 'off') {
+        state.abState = 'a';
+      } else if (state.abState === 'a') {
+        state.abState = 'b';
+      } else {
+        state.abState = 'off';
+      }
     },
     resetAb: state => {
-      state.abOn = false;
+      state.abState = 'off';
     },
     toggleShuffle: state => {
       state.shuffleOn = !state.shuffleOn;

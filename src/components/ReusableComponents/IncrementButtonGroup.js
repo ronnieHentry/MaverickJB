@@ -1,6 +1,8 @@
 import React from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, FlatList} from 'react-native';
 
+// Buttons inside the Speed, Pitch modal (+1, -1 pitch/speed)
+
 const IncrementButtonGroup = ({increments, onPress}) => {
   const renderButton = ({item}) => (
     <TouchableOpacity style={styles.button} onPress={() => onPress(item)}>
@@ -49,7 +51,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 12,
   },
 });
 
