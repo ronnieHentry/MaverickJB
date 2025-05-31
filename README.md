@@ -78,6 +78,17 @@ To learn more about React Native, take a look at the following resources:
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
 
-To implement:
-1. Playing animation in song list component
-2. mini player
+
+To run app in dev mode
+1. Open MaverickJB folder in VS code
+2. Connect phone (Ensure USB debgging is on) and open Android Studio
+3. Run "npm start" in vs code and enter 'a' when prompted for  run on android
+
+
+
+To build an apk file:
+cd android
+./gradlew assembleRelease
+
+Once build is complete, apk file will be at:
+android/app/build/outputs/apk/release/app-release.apk
